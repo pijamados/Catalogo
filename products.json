@@ -58,5 +58,25 @@
       "14",
       "16"
     ]
+  },
+  {
+    "imagen": "pijamas_varios_1790194871106_0.jpeg",
+    "galeria": [
+      "pijamas_varios_1790194872244_1.jpeg",
+      "pijamas_varios_1790194873675_2.jpeg",
+      "pijamas_varios_1790194875007_3.jpeg",
+      "pijamas_varios_1790194876381_4.jpeg"
+    ],
+    "rubro": "pijamas",
+    "nombre": "Pijamas varios",
+    "precio": 29000,
+    "descripcion": "Pijamas varios luminosos manga corta",
+    "categoria": "varon",
+    "talles": [
+      "8",
+      "12",
+      "14",
+      "16"
+    ]
   }
 ]
