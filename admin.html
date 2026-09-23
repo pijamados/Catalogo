@@ -162,6 +162,31 @@
   .panel-edicion.abierto { display: block; }
   .panel-edicion .acciones-editar { display: flex; gap: 8px; margin-top: 6px; }
   .panel-edicion .acciones-editar button { width: auto; padding: 10px 16px; font-size: 0.85rem; }
+
+  .fotos-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .foto-mini {
+    position: relative; width: 84px; text-align: center; font-size: 0.72rem; color: var(--muted);
+  }
+  .foto-mini img {
+    width: 84px; height: 84px; object-fit: cover; border-radius: 8px; border: 2px solid var(--border);
+    display: block; background: #f1f5f9;
+  }
+  .foto-mini.es-portada img { border-color: var(--green); }
+  .foto-mini .foto-portada-lbl {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    margin-top: 4px; cursor: pointer; font-weight: 600;
+  }
+  .foto-mini .foto-portada-lbl input { width: 14px; height: 14px; margin: 0; accent-color: var(--green); }
+  .foto-mini .foto-quitar {
+    position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--red); color: white; border: 2px solid white; font-size: 0.8rem; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .foto-mini.pendiente-borrar img { opacity: 0.3; }
+  .foto-mini.pendiente-borrar .foto-portada-lbl { display: none; }
+  .foto-mini .foto-deshacer { font-size: 0.7rem; color: var(--accent); cursor: pointer; text-decoration: underline; }
+  .agregar-fotos-edit { margin-top: 12px; }
+  .agregar-fotos-edit label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -217,8 +242,9 @@
       <div class="talles-grid" id="tallesAgregar"></div>
     </div>
     <div class="field">
-      <label for="foto">Foto del producto</label>
-      <input type="file" id="foto" accept="image/*">
+      <label for="foto">Fotos del producto (podés elegir varias)</label>
+      <input type="file" id="foto" accept="image/*" multiple>
+      <div class="fotos-preview" id="fotosPreviewAgregar"></div>
     </div>
     <button class="btn-primary" id="btnAgregar">Guardar y publicar</button>
     <div id="estadoAgregar"></div>
@@ -455,6 +481,31 @@
     });
   }
 
+  // --- Selector de fotos + portada, al agregar un producto nuevo ---
+  const fotoInput = document.getElementById("foto");
+  const previewAgregar = document.getElementById("fotosPreviewAgregar");
+
+  fotoInput.addEventListener("change", () => {
+    previewAgregar.innerHTML = "";
+    [...fotoInput.files].forEach((archivo, i) => {
+      const url = URL.createObjectURL(archivo);
+      const mini = document.createElement("div");
+      mini.className = "foto-mini" + (i === 0 ? " es-portada" : "");
+      mini.innerHTML = `
+        <img src="${url}">
+        <label class="foto-portada-lbl">
+          <input type="radio" name="portadaAgregar" value="${i}" ${i === 0 ? "checked" : ""}>
+          Portada
+        </label>
+      `;
+      mini.querySelector("input").onchange = () => {
+        previewAgregar.querySelectorAll(".foto-mini").forEach((m) => m.classList.remove("es-portada"));
+        mini.classList.add("es-portada");
+      };
+      previewAgregar.appendChild(mini);
+    });
+  });
+
   document.getElementById("btnAgregar").onclick = async () => {
     const nombre = document.getElementById("nombre").value.trim();
     const precio = document.getElementById("precio").value.trim();
@@ -462,14 +513,13 @@
     const rb = rubroDe($("rubro").value);
     const categoria = rb.genero ? document.getElementById("categoria").value : "";
     const talles = rb.talles ? leerTallesMarcados(document.getElementById("tallesAgregar")) : [];
-    const fotoInput = document.getElementById("foto");
     const estado = document.getElementById("estadoAgregar");
     const boton = document.getElementById("btnAgregar");
 
     estado.className = ""; estado.style.display = "none";
 
-    if (!nombre || !precio || !fotoInput.files[0]) {
-      estado.textContent = "Completá nombre, precio y elegí una foto.";
+    if (!nombre || !precio || fotoInput.files.length === 0) {
+      estado.textContent = "Completá nombre, precio y elegí al menos una foto.";
       estado.className = "error";
       return;
     }
@@ -478,14 +528,18 @@
     boton.textContent = "Guardando...";
 
     try {
-      const archivo = fotoInput.files[0];
-      const imagenBase64 = await fileToBase64(archivo);
-      const ext = archivo.name.split(".").pop();
+      const archivos = [...fotoInput.files];
+      const fotos = await Promise.all(archivos.map(async (a) => ({
+        base64: await fileToBase64(a),
+        ext: a.name.split(".").pop(),
+      })));
+      const radioMarcado = previewAgregar.querySelector('input[name="portadaAgregar"]:checked');
+      const portada = radioMarcado ? Number(radioMarcado.value) : 0;
 
       const resp = await fetch(WORKER_URL + "/agregar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: clave, nombre, precio, descripcion, categoria, rubro: rb.id, talles, imagenBase64, imagenExt: ext }),
+        body: JSON.stringify({ password: clave, nombre, precio, descripcion, categoria, rubro: rb.id, talles, fotos, portada }),
       });
       const data = await resp.json();
 
@@ -497,8 +551,9 @@
       document.getElementById("precio").value = "";
       document.getElementById("descripcion").value = "";
       fotoInput.value = "";
+      previewAgregar.innerHTML = "";
       crearCheckboxesTalle(document.getElementById("tallesAgregar"), "add");
-      productosCache.push({ imagen: data.imagen, rubro: rb.id, nombre, precio: isNaN(Number(precio)) ? precio : Number(precio), descripcion, categoria, talles });
+      productosCache.push({ imagen: data.imagen, galeria: data.galeria || [], rubro: rb.id, nombre, precio: isNaN(Number(precio)) ? precio : Number(precio), descripcion, categoria, talles });
       renderProductos();
       refrescarCategorias();
     } catch (e) {
@@ -653,6 +708,15 @@
             <label>Talles disponibles</label>
             <div class="talles-grid edit-talles"></div>
           </div>
+          <div class="field">
+            <label>Fotos (tocá "Portada" para elegir cuál se ve en el catálogo, o la ✕ para sacarla)</label>
+            <div class="fotos-preview edit-fotos"></div>
+            <div class="agregar-fotos-edit">
+              <label>Agregar más fotos</label>
+              <input type="file" class="edit-fotos-nuevas" accept="image/*" multiple>
+              <div class="fotos-preview edit-fotos-nuevas-preview"></div>
+            </div>
+          </div>
           <div id="estadoEditar-${CSS.escape(p.imagen)}"></div>
           <div class="acciones-editar">
             <button class="btn-secundario btn-guardar-edicion">Guardar cambios</button>
@@ -660,6 +724,69 @@
           </div>
         `;
         crearCheckboxesTalle(panelEdicion.querySelector(".edit-talles"), "edit-" + p.imagen, p.talles || []);
+
+        // --- Gestión de fotos: portada, eliminar, agregar ---
+        panelEdicion._fotosAEliminar = new Set();
+        panelEdicion._fotosNuevas = []; // Files pendientes de subir
+        panelEdicion._portadaSeleccionada = p.imagen;
+
+        function pintarFotosExistentes() {
+          const cont = panelEdicion.querySelector(".edit-fotos");
+          cont.innerHTML = "";
+          const todas = [p.imagen, ...(p.galeria || [])];
+          todas.forEach((f) => {
+            const marcada = panelEdicion._fotosAEliminar.has(f);
+            const mini = document.createElement("div");
+            mini.className = "foto-mini" + (f === panelEdicion._portadaSeleccionada ? " es-portada" : "") + (marcada ? " pendiente-borrar" : "");
+            mini.innerHTML = `
+              <img src="${IMG_BASE}${f}">
+              <label class="foto-portada-lbl">
+                <input type="radio" name="portada-${CSS.escape(p.imagen)}" ${f === panelEdicion._portadaSeleccionada ? "checked" : ""}>
+                Portada
+              </label>
+              ${marcada ? '<span class="foto-deshacer">Deshacer</span>' : '<button type="button" class="foto-quitar" title="Sacar foto">✕</button>'}
+            `;
+            if (!marcada) {
+              mini.querySelector(".foto-portada-lbl input").onchange = () => {
+                panelEdicion._portadaSeleccionada = f;
+                pintarFotosExistentes();
+              };
+              mini.querySelector(".foto-quitar").onclick = () => {
+                if (todas.length - panelEdicion._fotosAEliminar.size <= 1) {
+                  alert("El producto necesita al menos una foto.");
+                  return;
+                }
+                panelEdicion._fotosAEliminar.add(f);
+                if (panelEdicion._portadaSeleccionada === f) {
+                  panelEdicion._portadaSeleccionada = todas.find((x) => x !== f && !panelEdicion._fotosAEliminar.has(x));
+                }
+                pintarFotosExistentes();
+              };
+            } else {
+              mini.querySelector(".foto-deshacer").onclick = () => {
+                panelEdicion._fotosAEliminar.delete(f);
+                pintarFotosExistentes();
+              };
+            }
+            cont.appendChild(mini);
+          });
+        }
+        pintarFotosExistentes();
+
+        const inputFotosNuevas = panelEdicion.querySelector(".edit-fotos-nuevas");
+        const previewFotosNuevas = panelEdicion.querySelector(".edit-fotos-nuevas-preview");
+        inputFotosNuevas.onchange = () => {
+          panelEdicion._fotosNuevas = [...inputFotosNuevas.files];
+          previewFotosNuevas.innerHTML = "";
+          panelEdicion._fotosNuevas.forEach((archivo) => {
+            const url = URL.createObjectURL(archivo);
+            const mini = document.createElement("div");
+            mini.className = "foto-mini";
+            mini.innerHTML = `<img src="${url}"><span style="font-size:0.7rem;">Nueva</span>`;
+            previewFotosNuevas.appendChild(mini);
+          });
+        };
+
         listaProductos.appendChild(panelEdicion);
 
         panelEdicion.querySelector(".btn-cerrar-edicion").onclick = () => panelEdicion.classList.remove("abierto");
@@ -760,10 +887,17 @@
     boton.textContent = "Guardando...";
 
     try {
+      const fotosNuevas = await Promise.all((panelEdicion._fotosNuevas || []).map(async (a) => ({
+        base64: await fileToBase64(a),
+        ext: a.name.split(".").pop(),
+      })));
+      const eliminarFotos = [...(panelEdicion._fotosAEliminar || [])];
+      const portada = panelEdicion._portadaSeleccionada;
+
       const resp = await fetch(WORKER_URL + "/editar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: clave, imagen, nombre, precio, descripcion, categoria, rubro, talles }),
+        body: JSON.stringify({ password: clave, imagen, nombre, precio, descripcion, categoria, rubro, talles, fotosNuevas, eliminarFotos, portada }),
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || "Error desconocido");
@@ -771,7 +905,7 @@
       estado.textContent = "¡Cambios guardados! Puede demorar 1 minuto en verse en la web.";
       estado.className = "ok";
       const local = productosCache.find((x) => x.imagen === imagen);
-      if (local) Object.assign(local, { nombre, precio: isNaN(Number(precio)) ? precio : Number(precio), descripcion, categoria, rubro, talles });
+      if (local) Object.assign(local, { nombre, precio: isNaN(Number(precio)) ? precio : Number(precio), descripcion, categoria, rubro, talles, imagen: data.imagen, galeria: data.galeria || [] });
       setTimeout(() => { renderProductos(); refrescarCategorias(); }, 900);
     } catch (e) {
       estado.textContent = "No se pudo guardar: " + e.message;
