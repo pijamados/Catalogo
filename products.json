@@ -14,5 +14,19 @@
       "14",
       "16"
     ]
+  },
+  {
+    "imagen": "pijama_hello_kitty_1790193601531.jpeg",
+    "rubro": "pijamas",
+    "nombre": "Pijama Hello Kitty",
+    "precio": 28000,
+    "descripcion": "Pijama Hello Kitty Luminoso",
+    "categoria": "mujer",
+    "talles": [
+      "6",
+      "8",
+      "10",
+      "12"
+    ]
   }
 ]
