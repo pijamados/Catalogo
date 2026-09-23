@@ -1,0 +1,5 @@
+[
+  { "id": "pijamas", "nombre": "Pijamas", "genero": true, "talles": true },
+  { "id": "remeras", "nombre": "Remeras", "genero": true, "talles": true },
+  { "id": "mantas", "nombre": "Mantas", "genero": false, "talles": false }
+]
