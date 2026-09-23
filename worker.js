@@ -15,7 +15,8 @@
  *
  * Cada producto en products.json tiene esta forma:
  *   {
- *     imagen: "pijama-dino_123.jpg",   // identifica al producto, no cambia nunca
+ *     imagen: "pijama-dino_123.jpg",   // FOTO DE PORTADA, identifica al producto, no cambia salvo que se elija otra portada
+ *     galeria: ["pijama-dino_123_1.jpg", "pijama-dino_123_2.jpg"],  // fotos adicionales (opcional)
  *     nombre: "Pijama Dino",
  *     precio: 15000,
  *     descripcion: "Pijama de algodón manga larga",
@@ -127,6 +128,25 @@ function checkPassword(env, password) {
   return password && password === env.ADMIN_PASSWORD;
 }
 
+// Sube varias fotos nuevas (archivos siempre nuevos => nunca hay conflicto de sha) y devuelve sus nombres finales
+async function subirFotos(env, nombreProducto, fotos) {
+  const nombres = [];
+  for (let i = 0; i < fotos.length; i++) {
+    const f = fotos[i] || {};
+    if (!f.base64) continue;
+    const ext = (f.ext || "jpg").replace(".", "");
+    const nombreArchivo = `${limpiarTexto(nombreProducto)}_${Date.now()}_${i}.${ext}`;
+    await putFile(env, `img/${nombreArchivo}`, f.base64, `Sube foto: ${nombreProducto}`, null);
+    nombres.push(nombreArchivo);
+  }
+  return nombres;
+}
+
+async function borrarFoto(env, nombreArchivo) {
+  const archivo = await getFile(env, `img/${nombreArchivo}`);
+  if (archivo.exists) await deleteFile(env, `img/${nombreArchivo}`, archivo.sha, `Elimina foto: ${nombreArchivo}`);
+}
+
 const CATEGORIAS_DEFAULT = [
   { id: "pijamas", nombre: "Pijamas", genero: true, talles: true },
   { id: "remeras", nombre: "Remeras", genero: true, talles: true },
@@ -187,11 +207,11 @@ async function handleCategoriaEliminar(request, env) {
 
 async function handleAgregar(request, env) {
   const body = await request.json();
-  const { password, nombre, precio, descripcion, categoria, rubro, talles, imagenBase64, imagenExt } = body;
+  const { password, nombre, precio, descripcion, categoria, rubro, talles, fotos, portada } = body;
 
   if (!checkPassword(env, password)) return jsonResponse({ error: "Clave incorrecta" }, 401);
-  if (!nombre || !precio || !imagenBase64) {
-    return jsonResponse({ error: "Faltan datos (nombre, precio o imagen)" }, 400);
+  if (!nombre || !precio || !Array.isArray(fotos) || fotos.length === 0) {
+    return jsonResponse({ error: "Faltan datos (nombre, precio o al menos una foto)" }, 400);
   }
 
   const rubroId = String(rubro || "pijamas");
@@ -199,17 +219,20 @@ async function handleAgregar(request, env) {
   const rb = categorias.find((c) => c.id === rubroId);
   if (!rb) return jsonResponse({ error: "La categoría no existe" }, 400);
 
-  const ext = (imagenExt || "jpg").replace(".", "");
-  const nombreArchivo = `${limpiarTexto(nombre)}_${Date.now()}.${ext}`;
+  // 1) Subir todas las fotos (archivos nuevos siempre => nunca hay conflicto)
+  const nombresFotos = await subirFotos(env, nombre, fotos);
+  if (nombresFotos.length === 0) return jsonResponse({ error: "No se pudo subir ninguna foto" }, 500);
 
-  // 1) Subir la imagen (archivo nuevo siempre => nunca hay conflicto)
-  await putFile(env, `img/${nombreArchivo}`, imagenBase64, `Sube foto: ${nombre}`, null);
+  const idxPortada = Number.isInteger(portada) && portada >= 0 && portada < nombresFotos.length ? portada : 0;
+  const imagenPortada = nombresFotos[idxPortada];
+  const galeria = nombresFotos.filter((_, i) => i !== idxPortada);
 
   // 2) Agregar la entrada al products.json (con un reintento si alguien más escribió justo antes)
   for (let intento = 0; intento < 2; intento++) {
     const { productos, sha } = await leerProductos(env);
     productos.push({
-      imagen: nombreArchivo,
+      imagen: imagenPortada,
+      galeria,
       rubro: rubroId,
       nombre: String(nombre).trim(),
       precio: isNaN(Number(precio)) ? String(precio) : Number(precio),
@@ -219,7 +242,7 @@ async function handleAgregar(request, env) {
     });
     try {
       await guardarProductos(env, productos, sha, `Agregado producto: ${nombre}`);
-      return jsonResponse({ ok: true, imagen: nombreArchivo });
+      return jsonResponse({ ok: true, imagen: imagenPortada, galeria });
     } catch (e) {
       if (intento === 1) return jsonResponse({ error: "No se pudo guardar el producto: " + e.message }, 500);
       // si falló por sha desactualizado, reintenta leyendo de nuevo
@@ -229,19 +252,50 @@ async function handleAgregar(request, env) {
 
 async function handleEditar(request, env) {
   const body = await request.json();
-  const { password, imagen, nombre, precio, descripcion, categoria, rubro, talles } = body;
+  const { password, imagen, nombre, precio, descripcion, categoria, rubro, talles, fotosNuevas, eliminarFotos, portada } = body;
 
   if (!checkPassword(env, password)) return jsonResponse({ error: "Clave incorrecta" }, 401);
   if (!imagen) return jsonResponse({ error: "Falta indicar qué producto editar" }, 400);
 
   for (let intento = 0; intento < 2; intento++) {
     const { productos, sha } = await leerProductos(env);
-    const idx = productos.findIndex((p) => p.imagen === imagen);
+    const idx = productos.findIndex((p) => p.imagen === imagen || (p.galeria || []).includes(imagen));
     if (idx === -1) return jsonResponse({ error: "No se encontró ese producto" }, 404);
 
     const actual = productos[idx];
+    let fotosActuales = [actual.imagen, ...(actual.galeria || [])].filter(Boolean);
+
+    // sacar las fotos marcadas para eliminar (y borrar el archivo real de GitHub)
+    if (Array.isArray(eliminarFotos) && eliminarFotos.length) {
+      for (const f of eliminarFotos) {
+        if (fotosActuales.includes(f)) {
+          fotosActuales = fotosActuales.filter((x) => x !== f);
+          await borrarFoto(env, f);
+        }
+      }
+    }
+
+    // subir las fotos nuevas y sumarlas
+    if (Array.isArray(fotosNuevas) && fotosNuevas.length) {
+      const nuevos = await subirFotos(env, nombre || actual.nombre, fotosNuevas);
+      fotosActuales = [...fotosActuales, ...nuevos];
+    }
+
+    if (fotosActuales.length === 0) {
+      return jsonResponse({ error: "El producto necesita al menos una foto" }, 400);
+    }
+
+    // definir portada: la pedida si sigue existiendo, si no la que ya tenía, si no la primera disponible
+    let nuevaPortada = actual.imagen;
+    if (portada && fotosActuales.includes(portada)) nuevaPortada = portada;
+    if (!fotosActuales.includes(nuevaPortada)) nuevaPortada = fotosActuales[0];
+
+    const nuevaGaleria = fotosActuales.filter((f) => f !== nuevaPortada);
+
     productos[idx] = {
       ...actual,
+      imagen: nuevaPortada,
+      galeria: nuevaGaleria,
       rubro: rubro !== undefined ? String(rubro) : (actual.rubro || "pijamas"),
       nombre: nombre !== undefined ? String(nombre).trim() : actual.nombre,
       precio: precio !== undefined ? (isNaN(Number(precio)) ? String(precio) : Number(precio)) : actual.precio,
@@ -252,7 +306,7 @@ async function handleEditar(request, env) {
 
     try {
       await guardarProductos(env, productos, sha, `Editado producto: ${productos[idx].nombre}`);
-      return jsonResponse({ ok: true });
+      return jsonResponse({ ok: true, imagen: nuevaPortada, galeria: nuevaGaleria });
     } catch (e) {
       if (intento === 1) return jsonResponse({ error: "No se pudo guardar los cambios: " + e.message }, 500);
       // si falló por sha desactualizado, reintenta leyendo de nuevo
@@ -276,16 +330,17 @@ async function handleEliminar(request, env) {
 
   for (let intento = 0; intento < 2; intento++) {
     const { productos, sha } = await leerProductos(env);
+    const producto = productos.find((p) => p.imagen === imagen);
     const nuevaLista = productos.filter((p) => p.imagen !== imagen);
-    if (nuevaLista.length === productos.length) {
+    if (!producto) {
       return jsonResponse({ error: "No se encontró ese producto" }, 404);
     }
     try {
       await guardarProductos(env, nuevaLista, sha, `Eliminado producto (${imagen})`);
-      // borramos también la foto para no acumular archivos sueltos
-      const archivoImg = await getFile(env, `img/${imagen}`);
-      if (archivoImg.exists) {
-        await deleteFile(env, `img/${imagen}`, archivoImg.sha, `Elimina foto: ${imagen}`);
+      // borramos también todas sus fotos (portada + galería) para no acumular archivos sueltos
+      const todasLasFotos = [producto.imagen, ...(producto.galeria || [])].filter(Boolean);
+      for (const f of todasLasFotos) {
+        await borrarFoto(env, f);
       }
       return jsonResponse({ ok: true });
     } catch (e) {

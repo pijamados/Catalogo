@@ -164,6 +164,10 @@
         }
         .card img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; }
         .card-image-wrapper:hover img { transform: scale(1.06); }
+        .foto-count-badge {
+            position: absolute; bottom: 8px; right: 8px; background: rgba(15, 23, 42, 0.7);
+            color: #fff; font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+        }
 
         .card h3 { font-size: 1.15rem; font-weight: 700; margin: 0 0 6px 0; color: var(--text-main); }
 
@@ -202,6 +206,21 @@
             border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
         }
         .close-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .modal-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            color: #fff; font-size: 28px; cursor: pointer; background: rgba(255, 255, 255, 0.12);
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; user-select: none;
+        }
+        .modal-arrow:hover { background: rgba(255, 255, 255, 0.25); }
+        .modal-arrow.prev { left: 20px; }
+        .modal-arrow.next { right: 20px; }
+        .modal-counter {
+            position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+            color: #fff; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.15);
+            padding: 5px 14px; border-radius: 999px;
+        }
     </style>
 </head>
 <body>
@@ -242,7 +261,10 @@
 
     <div id="imageModal" class="modal">
         <span class="close-btn" id="closeModal">&times;</span>
+        <span class="modal-arrow prev" id="modalPrev">&#8249;</span>
         <img class="modal-content" id="modalImg" alt="Imagen ampliada">
+        <span class="modal-arrow next" id="modalNext">&#8250;</span>
+        <span class="modal-counter" id="modalCounter"></span>
     </div>
 
     <script>
@@ -340,12 +362,14 @@
 
                     const urlFoto = `${window.location.origin}${window.location.pathname.replace(/\/$/, '')}/img/${imagen}`;
                     const textoMensaje = encodeURIComponent(`Hola! Me interesa este producto:\n\n*${nombre}*\n${rb.talles ? `Talle: ${talles.join(', ') || 'consultar'}\n` : ''}Precio: ${precio}\nFoto: ${urlFoto}`);
+                    const fotos = [imagen, ...(Array.isArray(prod.galeria) ? prod.galeria : [])];
 
                     const card = document.createElement("div");
                     card.className = "card";
                     card.innerHTML = `
-                        <div class="card-image-wrapper" onclick="abrirModal('img/${imagen}')" title="Ampliar imagen">
+                        <div class="card-image-wrapper" title="Ampliar imagen">
                             <img src="img/${imagen}" alt="${nombre}" onerror="this.closest('.card').remove();">
+                            ${fotos.length > 1 ? `<span class="foto-count-badge">📷 ${fotos.length}</span>` : ''}
                         </div>
                         <h3>${nombre}</h3>
                         ${rb.talles ? `<div class="talles-chips">${talles.map(t => `<span class="talle-chip">Talle ${t}</span>`).join('') || '<span class="talle-chip">Consultar talle</span>'}</div>` : ''}
@@ -356,6 +380,7 @@
                             Consultar por WhatsApp
                         </a>
                     `;
+                    card.querySelector(".card-image-wrapper").onclick = () => abrirModal(fotos, 0);
                     contenedor.appendChild(card);
                 });
             }
@@ -460,13 +485,41 @@
         const modal = document.getElementById("imageModal");
         const modalImg = document.getElementById("modalImg");
         const closeModal = document.getElementById("closeModal");
+        const modalPrev = document.getElementById("modalPrev");
+        const modalNext = document.getElementById("modalNext");
+        const modalCounter = document.getElementById("modalCounter");
 
-        function abrirModal(rutaImagen) {
-            modal.style.display = "flex";
-            modalImg.src = rutaImagen;
+        let fotosModal = [];
+        let indiceModal = 0;
+
+        function pintarFotoModal() {
+            modalImg.src = "img/" + fotosModal[indiceModal];
+            const varias = fotosModal.length > 1;
+            modalPrev.style.display = varias ? "flex" : "none";
+            modalNext.style.display = varias ? "flex" : "none";
+            modalCounter.style.display = varias ? "block" : "none";
+            modalCounter.textContent = `${indiceModal + 1} / ${fotosModal.length}`;
         }
+
+        function abrirModal(fotos, indiceInicial) {
+            fotosModal = Array.isArray(fotos) ? fotos : [fotos];
+            indiceModal = indiceInicial || 0;
+            modal.style.display = "flex";
+            pintarFotoModal();
+        }
+        function fotoAnterior() { indiceModal = (indiceModal - 1 + fotosModal.length) % fotosModal.length; pintarFotoModal(); }
+        function fotoSiguiente() { indiceModal = (indiceModal + 1) % fotosModal.length; pintarFotoModal(); }
+
         closeModal.onclick = function() { modal.style.display = "none"; }
         modal.onclick = function(event) { if (event.target === modal) modal.style.display = "none"; }
+        modalPrev.onclick = function(e) { e.stopPropagation(); fotoAnterior(); }
+        modalNext.onclick = function(e) { e.stopPropagation(); fotoSiguiente(); }
+        document.addEventListener("keydown", function(e) {
+            if (modal.style.display !== "flex") return;
+            if (e.key === "Escape") modal.style.display = "none";
+            if (e.key === "ArrowLeft") fotoAnterior();
+            if (e.key === "ArrowRight") fotoSiguiente();
+        });
     </script>
 
 </body>
