@@ -44,5 +44,20 @@
       "14",
       "16"
     ]
+  },
+  {
+    "imagen": "pijama_afa_luminoso_1790193760952.jpeg",
+    "rubro": "pijamas",
+    "nombre": "Pijama AFA Luminoso",
+    "precio": 22000,
+    "descripcion": "Pijama Afa Luminoso Manga corta",
+    "categoria": "varon",
+    "talles": [
+      "6",
+      "8",
+      "10",
+      "14",
+      "16"
+    ]
   }
 ]
