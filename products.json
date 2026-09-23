@@ -37,5 +37,19 @@
       "12",
       "14"
     ]
+  },
+  {
+    "imagen": "pijama_luminoso_capibara_1790174683426.jpeg",
+    "nombre": "Pijama Luminoso Capibara",
+    "precio": 28000,
+    "descripcion": "Pijama algodon Luminos Capibara",
+    "categoria": "mujer",
+    "talles": [
+      "6",
+      "8",
+      "10",
+      "12",
+      "16"
+    ]
   }
 ]
