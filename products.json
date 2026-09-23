@@ -24,5 +24,18 @@
       "14",
       "16"
     ]
+  },
+  {
+    "imagen": "pijama_lumino_hello_kitty_1790173149808.jpeg",
+    "nombre": "Pijama Lumino Hello Kitty",
+    "precio": 32000,
+    "descripcion": "Pijama Luminoso Hello Kitty",
+    "categoria": "mujer",
+    "talles": [
+      "8",
+      "10",
+      "12",
+      "14"
+    ]
   }
 ]
