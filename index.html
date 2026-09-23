@@ -52,22 +52,32 @@
 
         header {
             background: linear-gradient(135deg, #1d4ed8, #2563eb 60%, #3b82f6);
-            padding: 18px 20px;
-            text-align: center;
+            padding: 16px 20px;
             margin-bottom: 26px;
             box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
         }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .marca { display: flex; align-items: center; gap: 12px; }
 
-        #logo { display: none; max-height: 100px; width: auto; margin: 0 auto; border-radius: 14px; }
+        #logo { display: none; max-height: 72px; width: auto; border-radius: 12px; }
         #logo.visible { display: inline-block; }
 
         h1 {
             margin: 0;
             font-family: 'Baloo 2', sans-serif;
-            font-size: 2.4rem;
+            font-size: 1.9rem;
             font-weight: 800;
             color: #ffffff;
             letter-spacing: -0.5px;
+            text-align: left;
         }
         h1.oculto { display: none; }
         h1 span { color: var(--amarillo); }
@@ -130,9 +140,21 @@
         }
         .filtro-item select:hover, .filtro-item select:focus { border-color: #2563eb; outline: none; }
 
-        .barra-rubros { margin-bottom: 12px; }
-        .cat-btn.rubro-btn { font-size: 1.1rem; }
-        .cat-btn.rubro-btn.activo { background: #1d4ed8; }
+        .barra-rubros {
+            margin: 0;
+            max-width: none;
+            padding: 0;
+            justify-content: flex-end;
+            flex: 1 1 auto;
+        }
+        .cat-btn.rubro-btn {
+            font-size: 1.05rem;
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        .cat-btn.rubro-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.7); color: #ffffff; }
+        .cat-btn.rubro-btn.activo { background: #ffffff; color: #1d4ed8; border-color: #ffffff; }
 
         .grid {
             display: grid;
@@ -221,16 +243,24 @@
             color: #fff; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.15);
             padding: 5px 14px; border-radius: 999px;
         }
+        @media (max-width: 640px) {
+            .header-top { justify-content: flex-start; }
+            .barra-rubros { justify-content: flex-start; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <img id="logo" alt="Pijamados">
-        <h1 id="titulo-texto">PIJA<span>MADOS</span></h1>
+        <div class="header-top">
+            <div class="marca">
+                <img id="logo" alt="Pijamados">
+                <h1 id="titulo-texto">PIJA<span>MADOS</span></h1>
+            </div>
+            <div class="categorias barra-rubros" id="barra-rubros"></div>
+        </div>
     </header>
 
-    <div class="categorias barra-rubros" id="barra-rubros"></div>
     <div class="categorias" id="barra-categorias"></div>
     <div class="filtros-wrap">
         <div class="filtro-item" id="filtro-talle">
