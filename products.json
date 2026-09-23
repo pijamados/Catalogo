@@ -78,5 +78,24 @@
       "14",
       "16"
     ]
+  },
+  {
+    "imagen": "remera_hello_kitty_1790195643811_1.jpeg",
+    "galeria": [
+      "remera_hello_kitty_1790195642188_0.jpeg"
+    ],
+    "rubro": "remeras",
+    "nombre": "Remera Hello Kitty",
+    "precio": 18000,
+    "descripcion": "Remera algodon",
+    "categoria": "mujer",
+    "talles": [
+      "6",
+      "8",
+      "10",
+      "12",
+      "14",
+      "16"
+    ]
   }
 ]
