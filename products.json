@@ -97,5 +97,21 @@
       "14",
       "16"
     ]
+  },
+  {
+    "imagen": "remera_minecraft_1790195845156_0.jpg",
+    "galeria": [
+      "remera_minecraft_1790195847008_1.jpg"
+    ],
+    "rubro": "remeras",
+    "nombre": "Remera Minecraft",
+    "precio": 19000,
+    "descripcion": "Remera Minecraft algodon",
+    "categoria": "varon",
+    "talles": [
+      "8",
+      "10",
+      "16"
+    ]
   }
 ]
