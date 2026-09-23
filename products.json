@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "imagen": "pijama_luminoso_dibu_martinez_1790172996621.jpeg",
+    "nombre": "Pijama Luminoso Dibu Martinez",
+    "precio": 28000,
+    "descripcion": "Pijama luminoso algodon manga larga",
+    "categoria": "varon",
+    "talles": [
+      "6",
+      "10",
+      "14",
+      "16"
+    ]
+  }
+]
