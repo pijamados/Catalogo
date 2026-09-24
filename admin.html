@@ -110,7 +110,18 @@
   }
   .producto-info { flex-grow: 1; min-width: 0; }
   .producto-info .nombre { font-weight: 600; font-size: 0.95rem; }
-  .producto-info .precio { color: var(--green-dark); font-size: 0.85rem; font-weight: 600; }
+  .producto-info .precio-editable { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .producto-info .precio-signo { color: var(--green-dark); font-size: 0.85rem; font-weight: 700; }
+  .producto-info .precio-input {
+    color: var(--green-dark); font-size: 0.85rem; font-weight: 700;
+    border: 1px dashed transparent; background: transparent; border-radius: 6px;
+    padding: 1px 5px; width: 90px; font-family: inherit;
+  }
+  .producto-info .precio-input:hover { border-color: var(--border); }
+  .producto-info .precio-input:focus { outline: none; border-color: var(--accent); border-style: solid; background: #eff6ff; }
+  .producto-info .precio-msg { font-size: 0.72rem; color: var(--muted); }
+  .producto-info .precio-msg.ok-msg { color: #059669; font-weight: 600; }
+  .producto-info .precio-msg.error-msg { color: #dc2626; font-weight: 600; }
   .producto-info .talles-resumen { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
   .chk-producto, .chk-todos {
@@ -645,11 +656,24 @@
           <img src="${IMG_BASE}${p.imagen}" onerror="this.style.opacity=0.2">
           <div class="producto-info">
             <div class="nombre">${p.nombre} <span style="color:var(--muted); font-weight:400; font-size:0.8rem;">${generoTexto ? "(" + generoTexto + ")" : ""}</span></div>
-            <div class="precio">${precioTexto}</div>
+            <div class="precio-editable">
+              <span class="precio-signo">$</span><input type="text" class="precio-input" value="${precioTexto.replace(/^\$/, '').replace(/"/g, '&quot;')}" inputmode="decimal">
+              <span class="precio-msg"></span>
+            </div>
             <div class="talles-rapidos"></div>
             <div class="talles-msg"></div>
           </div>
         `;
+
+        const precioInput = row.querySelector(".precio-input");
+        const precioMsg = row.querySelector(".precio-msg");
+        const precioOriginal = precioInput.value;
+        row.querySelector(".precio-editable").onclick = (e) => e.stopPropagation();
+        precioInput.addEventListener("keydown", (e) => { if (e.key === "Enter") precioInput.blur(); });
+        precioInput.addEventListener("blur", () => {
+          if (precioInput.value.trim() === "" || precioInput.value === precioOriginal) return;
+          guardarPrecioRapido(p, precioInput, precioMsg);
+        });
 
         const contTalles = row.querySelector(".talles-rapidos");
         const msgTalles = row.querySelector(".talles-msg");
@@ -806,6 +830,44 @@
       actualizarBarraSeleccion(productos.length);
     } catch (e) {
       listaEstado.textContent = "No se pudo cargar el catálogo: " + e.message;
+    }
+  }
+
+  async function guardarPrecioRapido(p, precioInput, precioMsg) {
+    const nuevoPrecio = precioInput.value.trim();
+    precioInput.disabled = true;
+    precioMsg.className = "precio-msg";
+    precioMsg.textContent = "Guardando...";
+
+    try {
+      const resp = await fetch(WORKER_URL + "/editar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: clave, imagen: p.imagen, precio: nuevoPrecio }),
+      });
+      let data = {};
+      try { data = await resp.json(); } catch (_) {}
+      if (!resp.ok) throw new Error(data.error || ("El servidor respondió " + resp.status));
+
+      p.precio = isNaN(Number(nuevoPrecio)) ? nuevoPrecio : Number(nuevoPrecio);
+      precioInput.value = String(p.precio);
+
+      const panelEd = document.querySelector(`.panel-edicion[data-imagen-edicion="${CSS.escape(p.imagen)}"]`);
+      if (panelEd) {
+        const campoPrecio = panelEd.querySelector(".edit-precio");
+        if (campoPrecio) campoPrecio.value = p.precio;
+      }
+
+      precioMsg.className = "precio-msg ok-msg";
+      precioMsg.textContent = "Guardado ✓";
+      setTimeout(() => {
+        if (precioMsg.classList.contains("ok-msg")) { precioMsg.textContent = ""; precioMsg.className = "precio-msg"; }
+      }, 2500);
+    } catch (e) {
+      precioMsg.className = "precio-msg error-msg";
+      precioMsg.textContent = "No se guardó: " + e.message;
+    } finally {
+      precioInput.disabled = false;
     }
   }
 
