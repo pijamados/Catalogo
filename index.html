@@ -231,11 +231,11 @@
 
         .modal-arrow {
             position: absolute; top: 50%; transform: translateY(-50%);
-            color: #fff; font-size: 28px; cursor: pointer; background: rgba(255, 255, 255, 0.12);
+            color: #fff; font-size: 28px; cursor: pointer; background: rgba(0, 0, 0, 0.55);
             width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s; user-select: none;
+            transition: background 0.2s; user-select: none; border: 1px solid rgba(255, 255, 255, 0.25);
         }
-        .modal-arrow:hover { background: rgba(255, 255, 255, 0.25); }
+        .modal-arrow:hover { background: rgba(0, 0, 0, 0.75); }
         .modal-arrow.prev { left: 20px; }
         .modal-arrow.next { right: 20px; }
         .modal-counter {
@@ -278,6 +278,10 @@
             .card-image-wrapper { height: 170px; margin-bottom: 10px; }
             .card h3 { font-size: 1.02rem; }
             .price { font-size: 1.1rem; margin: 3px 0 8px; }
+
+            .modal-arrow { width: 42px; height: 42px; font-size: 24px; }
+            .modal-arrow.prev { left: 8px; }
+            .modal-arrow.next { right: 8px; }
         }
     </style>
 </head>
@@ -495,7 +499,7 @@
 
             (function cargarLogo() {
                 const logo = document.getElementById("logo");
-                const candidatos = ["pijamados.jpg", "img/pijamados.jpg", "logo.jpg", "img/logo.jpg", "logo.png", "img/logo.png"];
+                const candidatos = ["pijamados.png", "img/pijamados.png", "pijamados.jpg", "img/pijamados.jpg", "logo.jpg", "img/logo.jpg", "logo.png", "img/logo.png"];
                 let i = 0;
                 const probar = () => {
                     if (i >= candidatos.length) return;
