@@ -1,21 +1,5 @@
 [
   {
-    "imagen": "pijama_capibara_1790193679295.jpeg",
-    "rubro": "pijamas",
-    "nombre": "Pijama Capibara",
-    "precio": 30000,
-    "descripcion": "Pijama Capibara Luminoso Manga Corta",
-    "categoria": "mujer",
-    "talles": [
-      "6",
-      "8",
-      "10",
-      "12",
-      "14",
-      "16"
-    ]
-  },
-  {
     "imagen": "remera_hello_kitty_1790195643811_1.jpeg",
     "galeria": [
       "remera_hello_kitty_1790195642188_0.jpeg"
