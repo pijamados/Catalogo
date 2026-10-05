@@ -160,6 +160,10 @@
   .grupo-titulo { margin: 22px 0 4px; font-size: 1.05rem; color: var(--accent); border-bottom: 2px solid var(--blue-chip); padding-bottom: 6px; }
   .grupo-titulo:first-of-type { margin-top: 8px; }
   .sub-titulo { margin: 12px 0 0; font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .grupo-titulo, .sub-titulo { cursor: pointer; user-select: none; }
+  .grupo-titulo .flecha, .sub-titulo .flecha { display: inline-block; width: 1.2em; }
+  .sub-titulo { padding: 8px 10px; background: var(--blue-chip); border-radius: 8px; margin-top: 10px; }
+  .oculto-grupo { display: none !important; }
   .cat-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
   .cat-fila small { color: var(--muted); display: block; font-size: 0.78rem; }
   .cat-check { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; margin-bottom: 8px; }
@@ -592,6 +596,31 @@
 
   let productosCache = [];
 
+  // ---- Grupos plegables (categoría > género) ----
+  const plegados = new Set();          // claves plegadas: "g:pijamas" o "s:pijamas|0"
+  let plegadoInicializado = false;
+  const filasVisibles = () => [...document.querySelectorAll("#listaProductos .producto-row")].filter((r) => !r.classList.contains("oculto-grupo"));
+
+  function aplicarPlegado() {
+    document.querySelectorAll("#listaProductos [data-key]").forEach((h) => {
+      h.querySelector(".flecha").textContent = plegados.has(h.dataset.key) ? "▸" : "▾";
+    });
+    document.querySelectorAll("#listaProductos [data-g]").forEach((el) => {
+      const oculto = plegados.has("g:" + el.dataset.g) || (el.dataset.s && plegados.has("s:" + el.dataset.s));
+      el.classList.toggle("oculto-grupo", !!oculto);
+      if (oculto && el.classList.contains("producto-row")) {   // lo que queda oculto no puede quedar seleccionado
+        const chk = el.querySelector(".chk-producto");
+        if (chk && chk.checked) { chk.checked = false; seleccionados.delete(el.dataset.imagen); }
+      }
+    });
+    actualizarBarraSeleccion(filasVisibles().length);
+  }
+
+  function alternarGrupo(clave) {
+    if (plegados.has(clave)) plegados.delete(clave); else plegados.add(clave);
+    aplicarPlegado();
+  }
+
   async function cargarProductos() {
     $("listaEstado").textContent = "Cargando...";
     mostrarAvisoLista("", "");
@@ -626,11 +655,25 @@
       if (huerfanos.length) grupos.push({ rubro: { id: "", nombre: "Sin categoría", genero: false, talles: false }, items: huerfanos });
       const ordenGenero = (p) => ({ varon: 0, mujer: 1 }[(p.categoria || "").toLowerCase()] ?? 2);
 
+      // La primera vez, los subgrupos de género con muchos productos arrancan plegados
+      if (!plegadoInicializado) {
+        plegadoInicializado = true;
+        grupos.forEach((g) => {
+          if (!g.rubro.genero) return;
+          [0, 1, 2].forEach((i) => {
+            if (g.items.filter((p) => ordenGenero(p) === i).length > 8) plegados.add(`s:${g.rubro.id}|${i}`);
+          });
+        });
+      }
+
       grupos.forEach((g) => {
        if (!g.items.length) return;
        const h = document.createElement("h3");
        h.className = "grupo-titulo";
-       h.textContent = `${g.rubro.nombre} (${g.items.length})`;
+       h.dataset.key = `g:${g.rubro.id}`;
+       h.innerHTML = '<span class="flecha"></span><span class="txt"></span>';
+       h.querySelector(".txt").textContent = `${g.rubro.nombre} (${g.items.length})`;
+       h.onclick = () => alternarGrupo(h.dataset.key);
        listaProductos.appendChild(h);
        let ultimoGen = null;
        const ordenados = g.rubro.genero ? [...g.items].sort((a, b) => ordenGenero(a) - ordenGenero(b)) : g.items;
@@ -639,7 +682,12 @@
           ultimoGen = ordenGenero(p);
           const sub = document.createElement("div");
           sub.className = "sub-titulo";
-          sub.textContent = ["Varón", "Mujer", "Sin género"][ultimoGen];
+          sub.dataset.g = g.rubro.id;
+          sub.dataset.key = `s:${g.rubro.id}|${ultimoGen}`;
+          const cantGen = g.items.filter((x) => ordenGenero(x) === ultimoGen).length;
+          sub.innerHTML = '<span class="flecha"></span><span class="txt"></span>';
+          sub.querySelector(".txt").textContent = `${["Varón", "Mujer", "Sin género"][ultimoGen]} (${cantGen})`;
+          sub.onclick = () => alternarGrupo(sub.dataset.key);
           listaProductos.appendChild(sub);
         }
         const rb = g.rubro.id ? g.rubro : rubroDe(p.rubro);
@@ -693,17 +741,22 @@
           e.stopPropagation();
           if (chk.checked) seleccionados.add(p.imagen);
           else seleccionados.delete(p.imagen);
-          actualizarBarraSeleccion(listaProductos.querySelectorAll(".chk-producto").length);
+          actualizarBarraSeleccion(filasVisibles().length);
         };
         chk.onclick = (e) => e.stopPropagation();
 
         row.dataset.imagen = p.imagen;
+        const claveSub = g.rubro.genero ? `${g.rubro.id}|${ordenGenero(p)}` : "";
+        row.dataset.g = g.rubro.id;
+        if (claveSub) row.dataset.s = claveSub;
         row.onclick = () => abrirPanelEdicion(p, row);
         listaProductos.appendChild(row);
 
         const panelEdicion = document.createElement("div");
         panelEdicion.className = "panel-edicion";
         panelEdicion.dataset.imagenEdicion = p.imagen;
+        panelEdicion.dataset.g = g.rubro.id;
+        if (claveSub) panelEdicion.dataset.s = claveSub;
         panelEdicion.innerHTML = `
           <div class="field">
             <label>Nombre</label>
@@ -827,7 +880,7 @@
        });
       });
 
-      actualizarBarraSeleccion(productos.length);
+      aplicarPlegado();
     } catch (e) {
       listaEstado.textContent = "No se pudo cargar el catálogo: " + e.message;
     }
@@ -979,7 +1032,7 @@
   }
 
   chkTodos.onchange = () => {
-    const filas = document.querySelectorAll("#listaProductos .producto-row");
+    const filas = filasVisibles();   // solo los que se ven: lo plegado nunca se selecciona
     filas.forEach((row) => {
       const chk = row.querySelector(".chk-producto");
       chk.checked = chkTodos.checked;
@@ -1001,7 +1054,7 @@
     btnEliminarSeleccion.textContent = `¿Seguro? Tocá de nuevo para eliminar ${cantidadOriginal}`;
     setTimeout(() => {
       if (btnEliminarSeleccion.textContent.startsWith("¿Seguro")) {
-        actualizarBarraSeleccion(document.querySelectorAll("#listaProductos .producto-row").length);
+        actualizarBarraSeleccion(filasVisibles().length);
       }
     }, 4000);
   };
