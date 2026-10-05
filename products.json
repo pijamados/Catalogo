@@ -1,22 +1,5 @@
 [
   {
-    "imagen": "pijama_super_mario_1790193509159.jpeg",
-    "rubro": "pijamas",
-    "nombre": "Pijama Super Mario",
-    "precio": 20000,
-    "descripcion": "Piajama Mario Luminoso",
-    "categoria": "varon",
-    "talles": [
-      "6",
-      "8",
-      "10",
-      "12",
-      "14",
-      "16"
-    ],
-    "galeria": []
-  },
-  {
     "imagen": "pijama_hello_kitty_1790193601531.jpeg",
     "rubro": "pijamas",
     "nombre": "Pijama Hello Kitty",
