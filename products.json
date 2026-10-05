@@ -149,5 +149,22 @@
       "8",
       "10"
     ]
+  },
+  {
+    "imagen": "pijama_de_invierno_termico_infantil_rosa_snoopy_1791232661491_0.webp",
+    "galeria": [
+      "pijama_de_invierno_termico_infantil_rosa_snoopy_1791232662689_1.webp",
+      "pijama_de_invierno_termico_infantil_rosa_snoopy_1791232664086_2.webp",
+      "pijama_de_invierno_termico_infantil_rosa_snoopy_1791232665843_3.jpg"
+    ],
+    "rubro": "pijamas",
+    "nombre": "Pijama De Invierno Térmico Infantil Rosa Snoopy",
+    "precio": 32000,
+    "descripcion": "Pijama Térmico infantil colección Otoño / Invierno.\nConfeccionados en Darlon premium. Ideales para pasar el invierno con comodidad y máxima protección contra el frio.\nEl Darlon es una fibra inteligente de alta gama que retiene el calor corporal de manera eficiente. Es una tela ultra suave al tacto, liviana y muy resistente al uso diario. No se deforma, no se estira y conserva su textura original lavado tras lavado sin formar pelotitas, garantizando una prenda duradera y confortable.\n**IMPORTANTE**: para evitar cambios de talles se sugiere ver previamente la TABLA DE TALLES QUE SE ENCUENTRA EN",
+    "categoria": "mujer",
+    "talles": [
+      "12",
+      "16"
+    ]
   }
 ]
