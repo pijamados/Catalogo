@@ -1,24 +1,5 @@
 [
   {
-    "imagen": "remera_hello_kitty_1790195643811_1.jpeg",
-    "galeria": [
-      "remera_hello_kitty_1790195642188_0.jpeg"
-    ],
-    "rubro": "remeras",
-    "nombre": "Remera Hello Kitty",
-    "precio": 18000,
-    "descripcion": "Remera algodon",
-    "categoria": "mujer",
-    "talles": [
-      "6",
-      "8",
-      "10",
-      "12",
-      "14",
-      "16"
-    ]
-  },
-  {
     "imagen": "manta_frazada_infantil_personajes_polar_soft_150_x_150_cm_capybara_marron_claro_1791232638861_0.webp",
     "galeria": [
       "manta_frazada_infantil_personajes_polar_soft_150_x_150_cm_capybara_marron_claro_1791232640085_1.webp",
