@@ -296,6 +296,12 @@
             .modal-arrow.prev { left: 8px; }
             .modal-arrow.next { right: 8px; }
         }
+
+        /* Promo emergente */
+        #promoFondo { display:none; position:fixed; inset:0; background:rgba(15,23,42,.65); z-index:9999; align-items:center; justify-content:center; padding:16px; }
+        #promoCaja { position:relative; max-width:min(440px, 100%); max-height:100%; }
+        #promoImg { display:block; max-width:100%; max-height:88vh; border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,.45); background:#fff; }
+        #promoCerrar { position:absolute; top:-12px; right:-12px; width:36px; height:36px; border-radius:50%; background:#fff; color:#1e293b; border:0; font-size:1.5rem; line-height:1; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.35); }
     </style>
 </head>
 <body>
@@ -623,6 +629,33 @@
             if (e.key === "ArrowLeft") fotoAnterior();
             if (e.key === "ArrowRight") fotoSiguiente();
         });
+    </script>
+
+    <div id="promoFondo" role="dialog" aria-modal="true">
+        <div id="promoCaja">
+            <button id="promoCerrar" aria-label="Cerrar">&times;</button>
+            <img id="promoImg" alt="Promoción">
+        </div>
+    </div>
+    <script>
+        // Promo emergente: lee promo.json; se muestra si está activa y no venció. Una vez por visita (por sesión).
+        (function () {
+            const fondo = document.getElementById("promoFondo");
+            const cerrar = () => { fondo.style.display = "none"; };
+            fondo.addEventListener("click", e => { if (e.target === fondo) cerrar(); });
+            document.getElementById("promoCerrar").onclick = cerrar;
+            fetch("./promo.json?t=" + Date.now())
+                .then(r => r.ok ? r.json() : null)
+                .then(p => {
+                    if (!p || !p.activa || (p.hasta && p.hasta < Date.now())) return;
+                    try { if (sessionStorage.getItem("promoVista") === String(p.id)) return; sessionStorage.setItem("promoVista", String(p.id)); } catch (e) {}
+                    if (!p.imagen) return;
+                    const img = document.getElementById("promoImg");
+                    img.onload = () => { fondo.style.display = "flex"; };   // aparece recién cuando la imagen terminó de cargar
+                    img.src = "./img/" + p.imagen;
+                })
+                .catch(() => {});
+        })();
     </script>
 
 </body>

@@ -313,6 +313,18 @@
     <div id="mlAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
   </section>
 
+  <section class="card">
+    <h2>📣 Promo emergente</h2>
+    <p style="font-size:0.9rem; margin:0 0 10px;">Es la imagen que aparece en una ventana al abrir el catálogo. Podés activarla, desactivarla o ponerle una duración.</p>
+    <div class="field"><label for="promoImagen">Imagen de la promo (el flyer)</label><input type="file" id="promoImagen" accept="image/*"></div>
+    <div id="promoVista" style="margin-bottom:12px;"></div>
+    <div class="field"><label for="promoDias">Duración en días (vacío = hasta que la desactives)</label><input type="number" id="promoDias" min="1" max="365" placeholder="Ej: 7"></div>
+    <div id="promoEstado" style="font-size:0.9rem; margin-bottom:10px;"></div>
+    <button class="btn-primary" id="btnPromoPublicar">Publicar / activar promo</button>
+    <button class="btn-danger" id="btnPromoDesactivar" style="margin-top:10px;">Desactivar promo</button>
+    <div id="promoAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
+  </section>
+
 </div>
 
 <script>
@@ -460,6 +472,7 @@
     panel.style.display = "block";
     cargarCategorias().then(cargarProductos);
     cargarEstadoML();
+    cargarPromo();
   }
 
   // ---- Sincronización con Mercado Libre ----
@@ -486,7 +499,7 @@
   }
   function resumenML(u) {
     if (!u) return "Todavía no se sincronizó nunca.";
-    const cuando = new Date(u.fecha).toLocaleString("es-AR");
+    const cuando = new Date(u.fecha).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }) + " (GMT-3)";
     if (!u.ok) return `⚠️ <b>Última sincronización (${escML(cuando)}) con error:</b> ${escML(u.error)}`;
     let h = `✅ <b>Última sincronización:</b> ${escML(cuando)}<br>${u.publicaciones} publicaciones leídas · ${u.productos} productos en el catálogo · <b>${u.cambios} actualizados</b>`;
     if (u.detalleCambios && u.detalleCambios.length) h += `<br><span style="color:#555;">Cambiaron: ${u.detalleCambios.map(escML).join(", ")}</span>`;
@@ -528,6 +541,63 @@
     } catch (e) { avisoML(e.message, "error"); }
     b.disabled = false; b.textContent = "Sincronizar ahora";
   };
+
+
+  // ---------- Promo emergente ----------
+  function avisoPromo(t, tipo) {
+    const e = $("promoAviso"); e.textContent = t; e.style.display = t ? "block" : "none";
+    e.style.background = tipo === "ok" ? "#d1fae5" : "#fee2e2"; e.style.color = tipo === "ok" ? "#065f46" : "#991b1b";
+  }
+  function fechaAR(ms) {
+    return new Date(ms).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }) + " (GMT-3)";
+  }
+  // Achica la imagen (máx. 1200 px de ancho) para que el catálogo cargue rápido
+  function reducirImagen(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => {
+        const esc = Math.min(1, 1200 / img.width), c = document.createElement("canvas");
+        c.width = Math.round(img.width * esc); c.height = Math.round(img.height * esc);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = () => reject(new Error("No se pudo leer la imagen."));
+      img.src = url;
+    });
+  }
+  let promoTieneImagen = false;
+  function mostrarVistaPromo(src) { $("promoVista").innerHTML = src ? '<img src="' + src + '" style="max-width:220px; width:100%; border-radius:10px; border:1px solid #e2e8f0;">' : ""; }
+  $("promoImagen").onchange = () => { const f = $("promoImagen").files[0]; if (f) mostrarVistaPromo(URL.createObjectURL(f)); };
+  async function cargarPromo() {
+    try {
+      const r = await fetch("./promo.json?t=" + Date.now());
+      if (!r.ok) { promoTieneImagen = false; $("promoEstado").textContent = "Estado: sin promo cargada."; return; }
+      const p = await r.json();
+      promoTieneImagen = !!p.imagen;
+      if (p.imagen && !$("promoImagen").files[0]) mostrarVistaPromo("./img/" + p.imagen);
+      const vencida = p.hasta && p.hasta < Date.now();
+      let e = p.activa && !vencida ? "🟢 <b>Activa</b>" : (vencida && p.activa ? "⚪ <b>Vencida</b>" : "⚪ <b>Desactivada</b>");
+      if (p.activa && p.hasta) e += (vencida ? " el " : " hasta el ") + fechaAR(p.hasta);
+      else if (p.activa) e += " (sin fecha de fin)";
+      $("promoEstado").innerHTML = "Estado: " + e;
+    } catch (e) { $("promoEstado").textContent = ""; }
+  }
+  async function guardarPromo(activa) {
+    const archivo = $("promoImagen").files[0];
+    if (activa && !archivo && !promoTieneImagen) return avisoPromo("Elegí la imagen de la promo.", "error");
+    const b = activa ? $("btnPromoPublicar") : $("btnPromoDesactivar"); b.disabled = true;
+    try {
+      const imagen = archivo ? { base64: await reducirImagen(archivo), ext: "jpg" } : null;
+      await llamarML("/promo-guardar", { activa, imagen, dias: Number($("promoDias").value) || 0 });
+      $("promoImagen").value = "";
+      avisoPromo(activa ? "Promo publicada. Tarda unos minutos en verse en el catálogo." : "Promo desactivada. Tarda unos minutos en dejar de verse.", "ok");
+      setTimeout(cargarPromo, 1500);
+    } catch (e) { avisoPromo(e.message, "error"); }
+    b.disabled = false;
+  }
+  $("btnPromoPublicar").onclick = () => guardarPromo(true);
+  $("btnPromoDesactivar").onclick = () => guardarPromo(false);
 
   async function intentarEntrar() {
     const intento = passwordInput.value.trim();
