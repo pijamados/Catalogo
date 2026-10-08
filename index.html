@@ -423,7 +423,7 @@
             function pintarProductos(productos) {
                 contenedor.innerHTML = "";
                 const rb = rubroActual();
-                let filtrados = productos.filter(p => (p.rubro || "pijamas") === rb.id);
+                let filtrados = productos.filter(p => (p.rubro || "pijamas") === rb.id && !p.agotado);
 
                 if (rb.genero && categoriaActiva !== "todos") {
                     filtrados = filtrados.filter(p => (p.categoria || "").toLowerCase() === categoriaActiva);

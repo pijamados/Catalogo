@@ -292,6 +292,27 @@
     </div>
   </section>
 
+  <section class="card">
+    <h2>🔄 Mercado Libre</h2>
+    <p style="font-size:0.9rem; margin:0 0 10px;">El catálogo se actualiza solo cada 30 minutos con tus publicaciones: talles con stock, nombres y productos agotados (se ocultan).</p>
+    <div id="mlEstado" style="font-size:0.92rem; line-height:1.55;">Cargando…</div>
+    <details id="mlConexion" style="margin-top:14px;">
+      <summary style="cursor:pointer; font-weight:600;">Conectar o volver a conectar con Mercado Libre</summary>
+      <ol style="font-size:0.9rem; line-height:1.6; padding-left:20px;">
+        <li>Iniciá sesión en Mercado Libre con la cuenta de la tienda y abrí <a id="mlLink" target="_blank" rel="noopener">este enlace de autorización</a>. Aceptá los permisos.</li>
+        <li>Te lleva a Google. Copiá la dirección completa de la barra del navegador (tiene <b>?code=TG-...</b>).</li>
+        <li>Pegala acá abajo y tocá <b>Conectar</b>. Hacelo enseguida: el código dura pocos minutos.</li>
+      </ol>
+      <div class="field">
+        <label for="mlCodigo">Dirección o código</label>
+        <input type="text" id="mlCodigo" placeholder="https://www.google.com/?code=TG-...">
+      </div>
+      <button class="btn-secundario" id="btnMLConectar">Conectar</button>
+    </details>
+    <button class="btn-secundario" id="btnMLSincronizar" style="margin-top:12px;">Sincronizar ahora</button>
+    <div id="mlAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
+  </section>
+
 </div>
 
 <script>
@@ -438,7 +459,75 @@
     loginBox.style.display = "none";
     panel.style.display = "block";
     cargarCategorias().then(cargarProductos);
+    cargarEstadoML();
   }
+
+  // ---- Sincronización con Mercado Libre ----
+  const ML_APP_ID = "1488623512929265";
+  const ML_REDIRECT = "https://www.google.com";
+  $("mlLink").href = "https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=" + ML_APP_ID + "&redirect_uri=" + encodeURIComponent(ML_REDIRECT);
+
+  function escML(t) { const d = document.createElement("div"); d.textContent = String(t == null ? "" : t); return d.innerHTML; }
+  function avisoML(texto, tipo) {
+    const e = $("mlAviso");
+    e.textContent = texto;
+    e.style.display = texto ? "block" : "none";
+    e.style.background = tipo === "ok" ? "#d1fae5" : "#fee2e2";
+    e.style.color = tipo === "ok" ? "#065f46" : "#991b1b";
+  }
+  async function llamarML(ruta, cuerpo) {
+    const resp = await fetch(WORKER_URL + ruta, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: clave, ...(cuerpo || {}) }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data.error || "Error desconocido");
+    return data;
+  }
+  function resumenML(u) {
+    if (!u) return "Todavía no se sincronizó nunca.";
+    const cuando = new Date(u.fecha).toLocaleString("es-AR");
+    if (!u.ok) return `⚠️ <b>Última sincronización (${escML(cuando)}) con error:</b> ${escML(u.error)}`;
+    let h = `✅ <b>Última sincronización:</b> ${escML(cuando)}<br>${u.publicaciones} publicaciones leídas · ${u.productos} productos en el catálogo · <b>${u.cambios} actualizados</b>`;
+    if (u.detalleCambios && u.detalleCambios.length) h += `<br><span style="color:#555;">Cambiaron: ${u.detalleCambios.map(escML).join(", ")}</span>`;
+    if (u.sinPublicaciones && u.sinPublicaciones.length) h += `<br>ℹ️ Sin publicación vinculada (no se tocan): ${u.sinPublicaciones.map(escML).join(", ")}`;
+    if (u.publicacionesNuevas) h += `<br>🆕 ${u.publicacionesNuevas} publicaciones activas de Mercado Libre no están en el catálogo (ej: ${(u.ejemplosNuevas || []).slice(0, 3).map(escML).join("; ")})`;
+    return h;
+  }
+  async function cargarEstadoML() {
+    try {
+      const d = await llamarML("/ml-estado");
+      let h;
+      if (!d.configurado) h = "⚠️ Falta terminar la configuración en Cloudflare (ML_KV, ML_CLIENT_ID y ML_CLIENT_SECRET).";
+      else if (!d.conectado) { h = "🔌 <b>No conectado todavía.</b> Abrí la sección de abajo para conectarlo."; $("mlConexion").open = true; }
+      else h = "🔗 <b>Conectado a Mercado Libre.</b><br>" + resumenML(d.ultimo);
+      $("mlEstado").innerHTML = h;
+    } catch (e) {
+      $("mlEstado").textContent = "No se pudo consultar el estado: " + e.message;
+    }
+  }
+  $("btnMLConectar").onclick = async () => {
+    const codigo = $("mlCodigo").value.trim();
+    if (!codigo) return avisoML("Pegá la dirección completa que quedó en la barra del navegador.", "error");
+    const b = $("btnMLConectar"); b.disabled = true;
+    try {
+      await llamarML("/ml-conectar", { code: codigo, redirect_uri: ML_REDIRECT });
+      $("mlCodigo").value = ""; $("mlConexion").open = false;
+      avisoML("Conectado. Tocá \"Sincronizar ahora\" para la primera actualización.", "ok");
+      cargarEstadoML();
+    } catch (e) { avisoML(e.message + " (si dice invalid_grant, el código venció: repetí desde el enlace)", "error"); }
+    b.disabled = false;
+  };
+  $("btnMLSincronizar").onclick = async () => {
+    const b = $("btnMLSincronizar"); b.disabled = true; b.textContent = "Sincronizando…";
+    try {
+      const r = await llamarML("/ml-sincronizar");
+      if (r.ok) { avisoML(`Listo: ${r.cambios} productos actualizados. El catálogo público tarda unos minutos en reflejarlo.`, "ok"); cargarProductos(); }
+      else avisoML("No se pudo sincronizar: " + r.error, "error");
+      cargarEstadoML();
+    } catch (e) { avisoML(e.message, "error"); }
+    b.disabled = false; b.textContent = "Sincronizar ahora";
+  };
 
   async function intentarEntrar() {
     const intento = passwordInput.value.trim();
