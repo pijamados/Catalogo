@@ -310,6 +310,7 @@
       <button class="btn-secundario" id="btnMLConectar">Conectar</button>
     </details>
     <button class="btn-secundario" id="btnMLSincronizar" style="margin-top:12px;">Sincronizar ahora</button>
+    <button class="btn-secundario" id="btnMLInforme" style="margin-top:12px;">Descargar informe en Excel</button>
     <div id="mlAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
   </section>
 
@@ -327,6 +328,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   // ⚠️ Pegá aquí la URL de tu Worker de Cloudflare
   const WORKER_URL = "https://pijamados-api.sebastianrearte271182.workers.dev";
@@ -533,6 +535,27 @@
     } catch (e) { avisoML(e.message + " (si dice invalid_grant, el código venció: repetí desde el enlace)", "error"); }
     b.disabled = false;
   };
+  $("btnMLInforme").onclick = async () => {
+    const b = $("btnMLInforme"); b.disabled = true; b.textContent = "Armando informe…";
+    try {
+      const d = await llamarML("/ml-informe");
+      if (typeof XLSX === "undefined") throw new Error("No cargó la librería de Excel. Revisá tu conexión y recargá la página.");
+      const hoja = (filas, cols) => {
+        const ws = XLSX.utils.json_to_sheet(filas.map((f) => Object.fromEntries(cols.map(([k, t]) => [t, f[k]]))));
+        ws["!cols"] = cols.map(([k, t]) => ({ wch: Math.min(60, Math.max(t.length + 2, ...filas.map((f) => String(f[k] ?? "").length + 2))) }));
+        return ws;
+      };
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, hoja(d.publicaciones, [["id","ID publicación"],["titulo","Título en Mercado Libre"],["estado","Estado"],["stock","Stock"],["nombreBase","Nombre sin talle"],["talleDetectado","Talle detectado"],["producto","Producto del catálogo"],["resultado","Resultado"],["observaciones","Observaciones"]]), "Publicaciones");
+      XLSX.utils.book_append_sheet(wb, hoja(d.productos, [["nombre","Producto"],["rubro","Categoría"],["genero","Género"],["visible","Visible en la página"],["tallesAntes","Talles antes"],["tallesAhora","Talles ahora"],["publicacionesVinculadas","Publicaciones vinculadas"],["detallePublicaciones","Detalle"],["estado","Estado"]]), "Productos");
+      const sinVincular = d.publicaciones.filter((p) => !p.producto);
+      XLSX.utils.book_append_sheet(wb, hoja(sinVincular, [["id","ID publicación"],["titulo","Título en Mercado Libre"],["estado","Estado"],["stock","Stock"],["resultado","Resultado"],["observaciones","Observaciones"]]), "Sin vincular");
+      XLSX.writeFile(wb, "informe-mercadolibre-" + new Date().toISOString().slice(0, 10) + ".xlsx");
+      avisoML(`Informe descargado: ${d.totales.publicaciones} publicaciones y ${d.totales.productos} productos.`, "ok");
+    } catch (e) { avisoML("No se pudo armar el informe: " + e.message, "error"); }
+    b.disabled = false; b.textContent = "Descargar informe en Excel";
+  };
+
   $("btnMLSincronizar").onclick = async () => {
     const b = $("btnMLSincronizar"); b.disabled = true; b.textContent = "Sincronizando…";
     try {
