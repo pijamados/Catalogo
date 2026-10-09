@@ -519,6 +519,7 @@
     if (u.fotosLimitadas && u.fotosLimitadas.length) h += `<br>⚠️ Se subieron menos fotos de lo que tienen en Mercado Libre por el límite gratis de Cloudflare: ${u.fotosLimitadas.map(escML).join(", ")}`;
     if (u.sinPublicaciones && u.sinPublicaciones.length) h += `<br>ℹ️ Sin publicación vinculada (no se tocan): ${u.sinPublicaciones.map(escML).join(", ")}`;
     if (u.publicacionesNuevas) h += `<br>🆕 ${u.publicacionesNuevas} publicaciones activas de Mercado Libre todavía no están en el catálogo (se agregan en las próximas corridas; ej: ${(u.ejemplosNuevas || []).slice(0, 3).map(escML).join("; ")})`;
+    if (u.noCreadas && u.noCreadas.length) h += `<br>⚠️ No se agregaron al catálogo: ${u.noCreadas.map(escML).join("; ")}`;
     return h;
   }
   async function cargarEstadoML() {
