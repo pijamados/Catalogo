@@ -351,7 +351,8 @@
     return categoriasCache.find((r) => r.id === rid) || { id: rid, nombre: rid, genero: true, talles: true };
   }
   function opcionesRubro(sel) {
-    return categoriasCache.map((r) => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.nombre}</option>`).join("");
+    const lista = categoriasCache.some((r) => r.id === sel) || !sel ? categoriasCache : [...categoriasCache, { id: sel, nombre: sel }];
+    return lista.map((r) => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${r.nombre}</option>`).join("");
   }
   function ajustarCamposAgregar() {
     const r = rubroDe($("rubro").value);
@@ -384,6 +385,13 @@
     });
   }
   async function cargarCategorias() {
+    if (clave) {   // primero se piden al Worker: están al instante, sin esperar a que se actualice la web
+      try {
+        const resp = await fetch(WORKER_URL + "/categorias-listar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: clave }) });
+        const d = await resp.json();
+        if (resp.ok && Array.isArray(d.categorias) && d.categorias.length) { categoriasCache = d.categorias; refrescarCategorias(); return; }
+      } catch (_) {}
+    }
     try {
       const resp = await fetch("./categorias.json?t=" + Date.now());
       if (resp.ok) {
@@ -562,7 +570,7 @@
     const b = $("btnMLSincronizar"); b.disabled = true; b.textContent = "Sincronizando…";
     try {
       const r = await llamarML("/ml-sincronizar");
-      if (r.ok) { avisoML(`Listo: ${r.cambios} productos actualizados. El catálogo público tarda unos minutos en reflejarlo.`, "ok"); cargarProductos(); }
+      if (r.ok) { avisoML(`Listo: ${r.cambios} productos actualizados. El catálogo público tarda unos minutos en reflejarlo.`, "ok"); cargarCategorias().then(cargarProductos); }
       else avisoML("No se pudo sincronizar: " + r.error, "error");
       cargarEstadoML();
     } catch (e) { avisoML(e.message, "error"); }
