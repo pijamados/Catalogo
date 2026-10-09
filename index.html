@@ -329,12 +329,6 @@
             <label for="talle-select">Talle</label>
             <select id="talle-select">
                 <option value="todos">Todos los talles</option>
-                <option value="6">6</option>
-                <option value="8">8</option>
-                <option value="10">10</option>
-                <option value="12">12</option>
-                <option value="14">14</option>
-                <option value="16">16</option>
             </select>
         </div>
         <div class="filtro-item">
@@ -457,7 +451,7 @@
                     const descripcion = prod.descripcion ? String(prod.descripcion).trim() : '';
                     const talles = Array.isArray(prod.talles) ? prod.talles : [];
 
-                    const urlFoto = `${window.location.origin}${window.location.pathname.replace(/\/$/, '')}/img/${imagen}`;
+                    const urlFoto = /^https?:\/\//i.test(imagen) ? imagen : `${window.location.origin}${window.location.pathname.replace(/\/$/, '')}/img/${imagen}`;
                     const textoMensaje = encodeURIComponent(`Hola! Me interesa este producto:\n\n*${nombre}*\n${rb.talles ? `Talle: ${talles.join(', ') || 'consultar'}\n` : ''}${MOSTRAR_PRECIOS ? `Precio: ${precio}\n` : ''}Foto: ${urlFoto}`);
                     const fotos = [imagen, ...(Array.isArray(prod.galeria) ? prod.galeria : [])];
 
@@ -465,7 +459,7 @@
                     card.className = "card";
                     card.innerHTML = `
                         <div class="card-image-wrapper" title="Ampliar imagen">
-                            <img src="img/${imagen}" alt="${nombre}" onerror="this.closest('.card').remove();">
+                            <img src="${rutaImg(imagen)}" alt="${nombre}" onerror="this.closest('.card').remove();">
                             ${fotos.length > 1 ? `<span class="foto-count-badge">📷 ${fotos.length}</span>` : ''}
                         </div>
                         <h3>${nombre}</h3>
@@ -557,6 +551,10 @@
             ])
                 .then(([productos, rubros]) => {
                     PRODUCTOS = productos;
+                    // el filtro de talles se arma solo con los talles que existan en los productos (4, 6, ... o los que se sumen)
+                    const tallesExistentes = [...new Set(productos.flatMap(p => (p.talles || []).map(String)))].sort((a, b) => Number(a) - Number(b));
+                    const selTalle = document.getElementById("talle-select");
+                    tallesExistentes.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t; selTalle.appendChild(o); });
                     if (Array.isArray(rubros) && rubros.length) RUBROS = rubros;
                     rubroActivo = RUBROS[0].id;
                     categoriaActiva = "todos";
@@ -589,8 +587,11 @@
         let fotosModal = [];
         let indiceModal = 0;
 
+        // las fotos pueden ser archivos de la carpeta img/ o links de Mercado Libre
+        function rutaImg(n) { return /^https?:\/\//i.test(n) ? n : "img/" + n; }
+
         function pintarFotoModal() {
-            modalImg.src = "img/" + fotosModal[indiceModal];
+            modalImg.src = rutaImg(fotosModal[indiceModal]);
             const varias = fotosModal.length > 1;
             modalPrev.style.display = varias ? "flex" : "none";
             modalNext.style.display = varias ? "flex" : "none";
@@ -652,7 +653,7 @@
                     if (!p.imagen) return;
                     const img = document.getElementById("promoImg");
                     img.onload = () => { fondo.style.display = "flex"; };   // aparece recién cuando la imagen terminó de cargar
-                    img.src = "./img/" + p.imagen;
+                    img.src = rutaImg(p.imagen);
                 })
                 .catch(() => {});
         })();
