@@ -20,13 +20,13 @@
   {
     "id": "buzos",
     "nombre": "Buzos",
-    "genero": true,
+    "genero": false,
     "talles": true
   },
   {
     "id": "calzas",
     "nombre": "Calzas",
-    "genero": true,
+    "genero": false,
     "talles": true
   }
 ]
