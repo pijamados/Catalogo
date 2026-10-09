@@ -20,7 +20,7 @@
   {
     "id": "buzos",
     "nombre": "Buzos",
-    "genero": false,
+    "genero": true,
     "talles": true
   },
   {
