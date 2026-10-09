@@ -2738,5 +2738,37 @@
         "talle": "10"
       }
     ]
+  },
+  {
+    "imagen": "https://http2.mlstatic.com/D_853876-MLA118958308891_102026-O.jpg",
+    "galeria": [
+      "https://http2.mlstatic.com/D_672420-MLA118957155945_102026-O.webp",
+      "https://http2.mlstatic.com/D_827578-MLA118957676289_102026-O.jpg",
+      "https://http2.mlstatic.com/D_705725-MLA117284473708_102026-O.webp"
+    ],
+    "rubro": "pijamas",
+    "nombre": "Pijamas Cortos Manga Corta Estampa Brilla En La Oscuridad Gris Cars",
+    "precio": 28999,
+    "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
+    "categoria": "varon",
+    "talles": [
+      "4",
+      "6",
+      "8"
+    ],
+    "ml": [
+      {
+        "id": "MLA4032602820",
+        "talle": "4"
+      },
+      {
+        "id": "MLA2155481513",
+        "talle": "8"
+      },
+      {
+        "id": "MLA2155481517",
+        "talle": "6"
+      }
+    ]
   }
 ]
