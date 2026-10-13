@@ -1738,9 +1738,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "varon",
-    "talles": [
-      "8"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA2045442052",
@@ -1766,7 +1764,8 @@
         "id": "MLA2045404402",
         "talle": "14"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_estampa_brilla_en_la_oscuridad_gris_sonic_1791233055520_0.webp",
