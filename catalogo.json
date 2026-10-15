@@ -1,28 +1,6 @@
 {
-  "paginas": [
-    "catalogo_1792091347417_001.jpg",
-    "catalogo_1792091347417_002.jpg",
-    "catalogo_1792091347417_003.jpg",
-    "catalogo_1792091347417_004.jpg",
-    "catalogo_1792091347417_005.jpg",
-    "catalogo_1792091347417_006.jpg",
-    "catalogo_1792091347417_007.jpg",
-    "catalogo_1792091347417_008.jpg",
-    "catalogo_1792091347417_009.jpg",
-    "catalogo_1792091347417_010.jpg",
-    "catalogo_1792091347417_011.jpg",
-    "catalogo_1792091347417_012.jpg",
-    "catalogo_1792091347417_013.jpg",
-    "catalogo_1792091347417_014.jpg",
-    "catalogo_1792091347417_015.jpg",
-    "catalogo_1792091347417_016.jpg",
-    "catalogo_1792091347417_017.jpg",
-    "catalogo_1792091347417_018.jpg",
-    "catalogo_1792091347417_019.jpg",
-    "catalogo_1792091347417_020.jpg",
-    "catalogo_1792091347417_021.jpg"
-  ],
-  "id": 1792091423933,
+  "activo": false,
   "titulo": "Catalogo de Verano",
-  "activo": true
+  "paginas": [],
+  "id": 1792092413609
 }
