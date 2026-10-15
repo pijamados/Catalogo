@@ -335,7 +335,8 @@
     <div id="catProgreso" style="font-size:0.9rem; margin-bottom:10px; display:none;"></div>
     <button class="btn-primary" id="btnCatPublicar">Subir y publicar catálogo</button>
     <button class="btn-secundario" id="btnCatTitulo" style="margin-top:10px;">Guardar solo el texto del botón</button>
-    <button class="btn-danger" id="btnCatOcultar" style="margin-top:10px;">Ocultar catálogo</button>
+    <button class="btn-secundario" id="btnCatOcultar" style="margin-top:10px; display:none;">Ocultar catálogo</button>
+    <button class="btn-danger" id="btnCatEliminar" style="margin-top:10px; display:none;">Eliminar catálogo</button>
     <div id="catAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
   </section>
 
@@ -701,20 +702,25 @@
     c.width = c.height = 0; page.cleanup();
     return b64;
   }
+  let catVisible = false;
   async function cargarCatalogo() {
     try {
       const r = await llamarML("/catalogo-estado");
       const c = r.catalogo || {};
       if (c.titulo && !$("catTitulo").value) $("catTitulo").value = c.titulo;
       const n = (c.paginas || []).length;
+      catVisible = !!c.activo && n > 0;
       $("catEstado").innerHTML = !n ? "Estado: sin catálogo cargado."
         : "Estado: " + (c.activo ? "🟢 <b>Visible</b>" : "⚪ <b>Oculto</b>") + " · " + n + " página" + (n === 1 ? "" : "s");
+      $("btnCatOcultar").style.display = n ? "" : "none";
+      $("btnCatEliminar").style.display = n ? "" : "none";
+      $("btnCatOcultar").textContent = catVisible ? "Ocultar catálogo" : "Mostrar catálogo";
     } catch (e) { $("catEstado").textContent = ""; }
   }
   async function publicarCatalogo() {
     const archivo = $("catPdf").files[0];
     if (!archivo) return avisoCat("Elegí el archivo PDF del catálogo.", "error");
-    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar"].map($);
+    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar", "btnCatEliminar"].map($);
     botones.forEach((b) => b.disabled = true);
     avisoCat("");
     const subidas = [];
@@ -756,7 +762,7 @@
     cargarCatalogo();
   }
   async function cambiarCatalogo(cuerpo, mensaje) {
-    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar"].map($);
+    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar", "btnCatEliminar"].map($);
     botones.forEach((b) => b.disabled = true);
     try { await llamarML("/catalogo-publicar", cuerpo); avisoCat(mensaje, "ok"); }
     catch (e) { avisoCat(e.message, "error"); }
@@ -765,7 +771,27 @@
   }
   $("btnCatPublicar").onclick = publicarCatalogo;
   $("btnCatTitulo").onclick = () => cambiarCatalogo({ titulo: $("catTitulo").value }, "Texto del botón guardado. Tarda unos minutos en verse.");
-  $("btnCatOcultar").onclick = () => cambiarCatalogo({ activo: false }, "Catálogo oculto. Tarda unos minutos en dejar de verse.");
+  $("btnCatOcultar").onclick = () => catVisible
+    ? cambiarCatalogo({ activo: false }, "Catálogo oculto. Tarda unos minutos en dejar de verse.")
+    : cambiarCatalogo({ activo: true }, "Catálogo visible. Tarda unos minutos en verse en la página.");
+  $("btnCatEliminar").onclick = async () => {
+    if (!confirm("¿Eliminar el catálogo? Se borran todas sus páginas y no se puede deshacer.")) return;
+    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar", "btnCatEliminar"].map($);
+    botones.forEach((b) => b.disabled = true);
+    avisoCat("");
+    try {
+      const r = await llamarML("/catalogo-eliminar");
+      const previas = r.previas || [];
+      for (let i = 0; i < previas.length; i += 15) {
+        progresoCat("Borrando páginas...");
+        try { await llamarML("/catalogo-borrar", { archivos: previas.slice(i, i + 15) }); } catch (e) {}
+      }
+      progresoCat("");
+      avisoCat("Catálogo eliminado. Tarda unos minutos en dejar de verse.", "ok");
+    } catch (e) { progresoCat(""); avisoCat(e.message, "error"); }
+    botones.forEach((b) => b.disabled = false);
+    cargarCatalogo();
+  };
 
   async function intentarEntrar() {
     const intento = passwordInput.value.trim();

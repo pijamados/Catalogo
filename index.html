@@ -304,8 +304,8 @@
         #promoCerrar { position:absolute; top:-12px; right:-12px; width:36px; height:36px; border-radius:50%; background:#fff; color:#1e293b; border:0; font-size:1.5rem; line-height:1; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.35); }
         /* Catálogo por pedido (visor a pantalla completa) */
         [hidden] { display: none !important; }
-        .cat-btn.catalogo-btn { font-size: 1.05rem; background: var(--amarillo); color: #1e293b; border: 2px solid var(--amarillo); }
-        .cat-btn.catalogo-btn:hover { background: #fcd34d; border-color: #fcd34d; color: #1e293b; }
+        .cat-btn.rubro-btn.catalogo-btn { background: var(--amarillo); color: #1e293b; border-color: var(--amarillo); }
+        .cat-btn.rubro-btn.catalogo-btn:hover { background: #fcd34d; border-color: #fcd34d; color: #1e293b; }
         #catVisor { position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column; background: #0f172a; }
         .cv-barra { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: linear-gradient(135deg, #1d4ed8, #2563eb 60%, #3b82f6); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
         #cvTitulo { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1.2rem; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -341,8 +341,7 @@
                 <img id="logo" alt="Pijamados">
                 <h1 id="titulo-texto">PIJA<span>MADOS</span></h1>
             </div>
-            <div class="categorias barra-rubros" id="barra-rubros"></div>
-            <button class="cat-btn catalogo-btn" id="btnCatalogo" hidden>Catálogo por pedido</button>
+            <div class="categorias barra-rubros" id="barra-rubros"><button class="cat-btn rubro-btn catalogo-btn" id="btnCatalogo" hidden>Catálogo por pedido</button></div>
         </div>
     </header>
 
@@ -500,6 +499,7 @@
             }
 
             function pintarRubros() {
+                const btnCat = document.getElementById("btnCatalogo");   // el botón del catálogo queda siempre al final de la fila
                 barraRubros.innerHTML = "";
                 RUBROS.forEach((r) => {
                     const btn = document.createElement("button");
@@ -516,6 +516,7 @@
                     };
                     barraRubros.appendChild(btn);
                 });
+                if (btnCat) barraRubros.appendChild(btnCat);
             }
 
             function pintarGenero() {
@@ -726,7 +727,7 @@
             function abrir() {
                 armar();
                 document.getElementById("cvTitulo").textContent = cat.titulo || "Catálogo por pedido";
-                document.getElementById("cvWsp").href = "https://wa.me/" + NUMERO_WSP + "?text=" + encodeURIComponent("¡Hola! Vi el catálogo y quiero hacer una consulta.");
+                document.getElementById("cvWsp").href = "https://wa.me/" + NUMERO_WSP + "?text=" + encodeURIComponent("¡Hola! Vi el catálogo por pedido y quiero hacer un pedido.");
                 visor.hidden = false;
                 scroll.scrollTop = 0;
                 document.body.style.overflow = "hidden";
