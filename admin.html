@@ -326,6 +326,19 @@
     <div id="promoAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
   </section>
 
+  <section class="card">
+    <h2>📖 Catálogo por pedido (PDF)</h2>
+    <p style="font-size:0.9rem; margin:0 0 10px;">Subí el PDF y se muestra dentro de la página, sin descarga. Cada PDF nuevo reemplaza al anterior.</p>
+    <div class="field"><label for="catPdf">Archivo PDF</label><input type="file" id="catPdf" accept="application/pdf"></div>
+    <div class="field"><label for="catTitulo">Texto del botón en la página</label><input type="text" id="catTitulo" maxlength="40" placeholder="Catálogo por pedido"></div>
+    <div id="catEstado" style="font-size:0.9rem; margin-bottom:10px;"></div>
+    <div id="catProgreso" style="font-size:0.9rem; margin-bottom:10px; display:none;"></div>
+    <button class="btn-primary" id="btnCatPublicar">Subir y publicar catálogo</button>
+    <button class="btn-secundario" id="btnCatTitulo" style="margin-top:10px;">Guardar solo el texto del botón</button>
+    <button class="btn-danger" id="btnCatOcultar" style="margin-top:10px;">Ocultar catálogo</button>
+    <div id="catAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
+  </section>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -484,6 +497,7 @@
     cargarCategorias().then(cargarProductos);
     cargarEstadoML();
     cargarPromo();
+    cargarCatalogo();
   }
 
   // ---- Sincronización con Mercado Libre ----
@@ -634,6 +648,124 @@
   }
   $("btnPromoPublicar").onclick = () => guardarPromo(true);
   $("btnPromoDesactivar").onclick = () => guardarPromo(false);
+
+  // ---------- Catálogo en PDF ----------
+  // El PDF se convierte a imágenes (una por página) en este navegador y se sube página por página.
+  const PDFJS_VERSION = "3.11.174";
+  const MAX_PAGINAS_CATALOGO = 60;
+  const ANCHO_PAGINA_CATALOGO = 1100;   // px; buena nitidez en celular sin pesar de más
+  function avisoCat(t, tipo) {
+    const e = $("catAviso"); e.textContent = t; e.style.display = t ? "block" : "none";
+    e.style.background = tipo === "ok" ? "#d1fae5" : "#fee2e2"; e.style.color = tipo === "ok" ? "#065f46" : "#991b1b";
+  }
+  function progresoCat(t) { const e = $("catProgreso"); e.textContent = t; e.style.display = t ? "block" : "none"; }
+  let pdfJsPromesa = null;
+  function cargarPdfJs() {
+    if (!pdfJsPromesa) pdfJsPromesa = new Promise((resolve, reject) => {
+      const base = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/" + PDFJS_VERSION + "/";
+      const sc = document.createElement("script");
+      sc.src = base + "pdf.min.js";
+      sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + "pdf.worker.min.js"; resolve(window.pdfjsLib); };
+      sc.onerror = () => { pdfJsPromesa = null; reject(new Error("No se pudo cargar el lector de PDF. Revisá tu conexión.")); };
+      document.head.appendChild(sc);
+    });
+    return pdfJsPromesa;
+  }
+  let logoPromesa = null;
+  function logoMarcaAgua() {   // usa pijamados.png (el logo con fondo transparente) de la carpeta de la página
+    if (!logoPromesa) logoPromesa = new Promise((resolve) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = () => resolve(null);
+      im.src = "./pijamados.png";
+    });
+    return logoPromesa;
+  }
+  async function paginaPdfAJpg(pdf, n) {
+    const page = await pdf.getPage(n);
+    const base = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: Math.min(3, ANCHO_PAGINA_CATALOGO / base.width) });
+    const c = document.createElement("canvas");
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const marca = await logoMarcaAgua();
+    if (marca) {   // marca de agua centrada, grabada en la imagen
+      const w = c.width * 0.55, h = w * marca.height / marca.width;
+      ctx.globalAlpha = 0.16;
+      ctx.drawImage(marca, (c.width - w) / 2, (c.height - h) / 2, w, h);
+      ctx.globalAlpha = 1;
+    }
+    const b64 = c.toDataURL("image/jpeg", 0.82).split(",")[1];
+    c.width = c.height = 0; page.cleanup();
+    return b64;
+  }
+  async function cargarCatalogo() {
+    try {
+      const r = await llamarML("/catalogo-estado");
+      const c = r.catalogo || {};
+      if (c.titulo && !$("catTitulo").value) $("catTitulo").value = c.titulo;
+      const n = (c.paginas || []).length;
+      $("catEstado").innerHTML = !n ? "Estado: sin catálogo cargado."
+        : "Estado: " + (c.activo ? "🟢 <b>Visible</b>" : "⚪ <b>Oculto</b>") + " · " + n + " página" + (n === 1 ? "" : "s");
+    } catch (e) { $("catEstado").textContent = ""; }
+  }
+  async function publicarCatalogo() {
+    const archivo = $("catPdf").files[0];
+    if (!archivo) return avisoCat("Elegí el archivo PDF del catálogo.", "error");
+    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar"].map($);
+    botones.forEach((b) => b.disabled = true);
+    avisoCat("");
+    const subidas = [];
+    try {
+      progresoCat("Abriendo el PDF...");
+      const pdfjs = await cargarPdfJs();
+      const pdf = await pdfjs.getDocument({ data: await archivo.arrayBuffer() }).promise;
+      const total = pdf.numPages;
+      if (total > MAX_PAGINAS_CATALOGO) throw new Error("El PDF tiene " + total + " páginas; el máximo es " + MAX_PAGINAS_CATALOGO + ".");
+      const lote = String(Date.now());
+      for (let n = 1; n <= total; n++) {
+        progresoCat("Subiendo página " + n + " de " + total + "...");
+        const base64 = await paginaPdfAJpg(pdf, n);
+        let resp = null, ultimo = null;
+        for (let intento = 0; intento < 3 && !resp; intento++) {
+          try { resp = await llamarML("/catalogo-pagina", { lote, indice: n - 1, imagen: { base64 } }); }
+          catch (e) { ultimo = e; await new Promise((ok) => setTimeout(ok, 1500)); }
+        }
+        if (!resp) throw ultimo;
+        subidas.push(resp.nombre);
+      }
+      progresoCat("Publicando catálogo...");
+      const pub = await llamarML("/catalogo-publicar", { paginas: subidas, titulo: $("catTitulo").value, activo: true });
+      subidas.length = 0;   // quedó publicado: ya no hay nada que limpiar
+      const previas = pub.previas || [];
+      for (let i = 0; i < previas.length; i += 15) {
+        progresoCat("Limpiando el catálogo anterior...");
+        try { await llamarML("/catalogo-borrar", { archivos: previas.slice(i, i + 15) }); } catch (e) {}
+      }
+      $("catPdf").value = "";
+      progresoCat("");
+      avisoCat("Catálogo publicado. Tarda unos minutos en verse en la página.", "ok");
+    } catch (e) {
+      progresoCat("");
+      if (subidas.length) { try { await llamarML("/catalogo-borrar", { archivos: subidas.slice(0, 15) }); } catch (x) {} }   // limpia páginas sueltas si algo falló
+      avisoCat(e.message, "error");
+    }
+    botones.forEach((b) => b.disabled = false);
+    cargarCatalogo();
+  }
+  async function cambiarCatalogo(cuerpo, mensaje) {
+    const botones = ["btnCatPublicar", "btnCatTitulo", "btnCatOcultar"].map($);
+    botones.forEach((b) => b.disabled = true);
+    try { await llamarML("/catalogo-publicar", cuerpo); avisoCat(mensaje, "ok"); }
+    catch (e) { avisoCat(e.message, "error"); }
+    botones.forEach((b) => b.disabled = false);
+    cargarCatalogo();
+  }
+  $("btnCatPublicar").onclick = publicarCatalogo;
+  $("btnCatTitulo").onclick = () => cambiarCatalogo({ titulo: $("catTitulo").value }, "Texto del botón guardado. Tarda unos minutos en verse.");
+  $("btnCatOcultar").onclick = () => cambiarCatalogo({ activo: false }, "Catálogo oculto. Tarda unos minutos en dejar de verse.");
 
   async function intentarEntrar() {
     const intento = passwordInput.value.trim();

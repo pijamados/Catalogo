@@ -302,6 +302,28 @@
         #promoCaja { position:relative; max-width:min(440px, 100%); max-height:100%; }
         #promoImg { display:block; max-width:100%; max-height:88vh; border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,.45); background:#fff; }
         #promoCerrar { position:absolute; top:-12px; right:-12px; width:36px; height:36px; border-radius:50%; background:#fff; color:#1e293b; border:0; font-size:1.5rem; line-height:1; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.35); }
+        /* Catálogo por pedido (visor a pantalla completa) */
+        [hidden] { display: none !important; }
+        .cat-btn.catalogo-btn { font-size: 1.05rem; background: var(--amarillo); color: #1e293b; border: 2px solid var(--amarillo); }
+        .cat-btn.catalogo-btn:hover { background: #fcd34d; border-color: #fcd34d; color: #1e293b; }
+        #catVisor { position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column; background: #0f172a; }
+        .cv-barra { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: linear-gradient(135deg, #1d4ed8, #2563eb 60%, #3b82f6); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+        #cvTitulo { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1.2rem; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #cvPagina { font-size: .85rem; font-weight: 600; background: rgba(255,255,255,.18); padding: 4px 12px; border-radius: 999px; }
+        #cvCerrar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(255,255,255,.15); color: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+        #cvCerrar:hover { background: rgba(255,255,255,.3); }
+        #cvScroll { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 12px 110px; }
+        #cvPaginas { max-width: 820px; margin: 0 auto; }
+        #cvPaginas img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1.414; margin: 0 0 14px; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.4); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        #cvWsp { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); white-space: nowrap; padding: 13px 24px; border-radius: 999px; box-shadow: 0 8px 22px rgba(0,0,0,.4); text-decoration: none; }
+        @media (max-width: 640px) { #cvTitulo { font-size: 1.05rem; } #cvScroll { padding: 10px 8px 100px; } }
+        /* Marca de agua sobre las fotos de productos (incluye las de Mercado Libre) */
+        .card-image-wrapper::after, .modal-marco::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background: url("pijamados.png") center / 58% auto no-repeat; opacity: 0.22;
+        }
+        .modal-marco { position: relative; display: inline-block; max-width: 90%; max-height: 90vh; line-height: 0; }
+        .modal-marco .modal-content { max-width: 100%; max-height: 90vh; display: block; }
     </style>
 </head>
 <body>
@@ -320,6 +342,7 @@
                 <h1 id="titulo-texto">PIJA<span>MADOS</span></h1>
             </div>
             <div class="categorias barra-rubros" id="barra-rubros"></div>
+            <button class="cat-btn catalogo-btn" id="btnCatalogo" hidden>Catálogo por pedido</button>
         </div>
     </header>
 
@@ -348,7 +371,7 @@
     <div id="imageModal" class="modal">
         <span class="close-btn" id="closeModal">&times;</span>
         <span class="modal-arrow prev" id="modalPrev">&#8249;</span>
-        <img class="modal-content" id="modalImg" alt="Imagen ampliada">
+        <span class="modal-marco"><img class="modal-content" id="modalImg" alt="Imagen ampliada" draggable="false"></span>
         <span class="modal-arrow next" id="modalNext">&#8250;</span>
         <span class="modal-counter" id="modalCounter"></span>
     </div>
@@ -654,6 +677,74 @@
                     const img = document.getElementById("promoImg");
                     img.onload = () => { fondo.style.display = "flex"; };   // aparece recién cuando la imagen terminó de cargar
                     img.src = rutaImg(p.imagen);
+                })
+                .catch(() => {});
+        })();
+    </script>
+
+    <div id="catVisor" role="dialog" aria-modal="true" aria-label="Catálogo por pedido" hidden>
+        <div class="cv-barra">
+            <span id="cvTitulo">Catálogo por pedido</span>
+            <span id="cvPagina"></span>
+            <button id="cvCerrar" aria-label="Cerrar">&times;</button>
+        </div>
+        <div id="cvScroll"><div id="cvPaginas"></div></div>
+        <a id="cvWsp" class="btn-whatsapp" target="_blank" rel="noopener">Hacer mi pedido por WhatsApp</a>
+    </div>
+    <script>
+        // Catálogo por pedido: lee catalogo.json (lo publica el admin a partir de un PDF). Si no está activo, el botón no aparece.
+        (function () {
+            const NUMERO_WSP = "5491159230739";   // mismo número que usan las tarjetas de productos
+            const btn = document.getElementById("btnCatalogo");
+            const visor = document.getElementById("catVisor");
+            const cont = document.getElementById("cvPaginas");
+            const scroll = document.getElementById("cvScroll");
+            const contador = document.getElementById("cvPagina");
+            let cat = null, armadoId = null, observador = null;
+
+            function armar() {
+                if (armadoId === cat.id) return;
+                armadoId = cat.id;
+                cont.innerHTML = "";
+                if (observador) observador.disconnect();
+                observador = "IntersectionObserver" in window ? new IntersectionObserver((entradas) => {
+                    entradas.forEach((en) => { if (en.isIntersecting) contador.textContent = (Number(en.target.dataset.n) + 1) + " / " + cat.paginas.length; });
+                }, { root: scroll, threshold: 0.5 }) : null;
+                cat.paginas.forEach((nombre, i) => {
+                    const img = document.createElement("img");
+                    img.alt = "Catálogo, página " + (i + 1);
+                    img.dataset.n = i;
+                    img.draggable = false;
+                    img.loading = i < 2 ? "eager" : "lazy";
+                    img.onload = () => { img.style.aspectRatio = "auto"; };
+                    img.src = "img/" + nombre;
+                    cont.appendChild(img);
+                    if (observador) observador.observe(img);
+                });
+                contador.textContent = "1 / " + cat.paginas.length;
+            }
+            function abrir() {
+                armar();
+                document.getElementById("cvTitulo").textContent = cat.titulo || "Catálogo por pedido";
+                document.getElementById("cvWsp").href = "https://wa.me/" + NUMERO_WSP + "?text=" + encodeURIComponent("¡Hola! Vi el catálogo por pedido y quiero hacer un pedido.");
+                visor.hidden = false;
+                scroll.scrollTop = 0;
+                document.body.style.overflow = "hidden";
+            }
+            function cerrar() { visor.hidden = true; document.body.style.overflow = ""; }
+
+            btn.onclick = abrir;
+            document.getElementById("cvCerrar").onclick = cerrar;
+            document.addEventListener("keydown", (e) => { if (!visor.hidden && e.key === "Escape") cerrar(); });
+            visor.addEventListener("contextmenu", (e) => { if (e.target.tagName === "IMG") e.preventDefault(); });
+
+            fetch("./catalogo.json?t=" + Date.now())
+                .then((r) => r.ok ? r.json() : null)
+                .then((c) => {
+                    if (!c || !c.activo || !Array.isArray(c.paginas) || !c.paginas.length) return;
+                    cat = c;
+                    btn.textContent = c.titulo || "Catálogo por pedido";
+                    btn.hidden = false;
                 })
                 .catch(() => {});
         })();
