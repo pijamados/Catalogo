@@ -38,6 +38,19 @@
 
   .wrap { max-width: 640px; margin: 0 auto; padding: 24px 18px; }
 
+  /* Celular y tablet: una sola columna, en el orden de siempre */
+  .columnas { display: flex; flex-direction: column; }
+  .col { display: contents; }
+  .columnas section.card { order: var(--orden, 0); }
+
+  /* Pantalla grande: dos columnas. Izquierda: cargar producto, flyer y catálogo. Derecha: productos, categorías y Mercado Libre */
+  @media (min-width: 1000px) {
+    .wrap { max-width: 1320px; }
+    .columnas { display: grid; grid-template-columns: minmax(380px, 5fr) minmax(0, 7fr); gap: 0 24px; align-items: start; }
+    .col { display: block; min-width: 0; }
+    .columnas section.card { order: 0; }
+  }
+
   #loginBox {
     max-width: 360px; margin: 80px auto; text-align: center;
     background: var(--card); border: 1px solid var(--border); border-radius: 14px;
@@ -227,7 +240,9 @@
     <button id="btnSalir" style="width:auto; background:none; color:var(--muted); font-size:0.85rem; padding:6px 10px; text-decoration:underline;">Cerrar sesión</button>
   </div>
 
-  <section class="card">
+  <div class="columnas">
+  <div class="col col-izq">
+  <section class="card" style="--orden:1;">
     <h2>➕ Agregar producto nuevo</h2>
     <div class="field">
       <label for="rubro">Categoría</label>
@@ -264,8 +279,33 @@
     <button class="btn-primary" id="btnAgregar">Guardar y publicar</button>
     <div id="estadoAgregar"></div>
   </section>
-
-  <section class="card">
+  <section class="card" style="--orden:5;">
+    <h2>📣 Promo emergente</h2>
+    <p style="font-size:0.9rem; margin:0 0 10px;">Es la imagen que aparece en una ventana al abrir el catálogo. Podés activarla, desactivarla o ponerle una duración.</p>
+    <div class="field"><label for="promoImagen">Imagen de la promo (el flyer)</label><input type="file" id="promoImagen" accept="image/*"></div>
+    <div id="promoVista" style="margin-bottom:12px;"></div>
+    <div class="field"><label for="promoDias">Duración en días (vacío = hasta que la desactives)</label><input type="number" id="promoDias" min="1" max="365" placeholder="Ej: 7"></div>
+    <div id="promoEstado" style="font-size:0.9rem; margin-bottom:10px;"></div>
+    <button class="btn-primary" id="btnPromoPublicar">Publicar / activar promo</button>
+    <button class="btn-danger" id="btnPromoDesactivar" style="margin-top:10px;">Desactivar promo</button>
+    <div id="promoAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
+  </section>
+  <section class="card" style="--orden:6;">
+    <h2>📖 Catálogo por pedido (PDF)</h2>
+    <p style="font-size:0.9rem; margin:0 0 10px;">Subí el PDF y se muestra dentro de la página, sin descarga. Cada PDF nuevo reemplaza al anterior.</p>
+    <div class="field"><label for="catPdf">Archivo PDF</label><input type="file" id="catPdf" accept="application/pdf"></div>
+    <div class="field"><label for="catTitulo">Texto del botón en la página</label><input type="text" id="catTitulo" maxlength="40" placeholder="Catálogo por pedido"></div>
+    <div id="catEstado" style="font-size:0.9rem; margin-bottom:10px;"></div>
+    <div id="catProgreso" style="font-size:0.9rem; margin-bottom:10px; display:none;"></div>
+    <button class="btn-primary" id="btnCatPublicar">Subir y publicar catálogo</button>
+    <button class="btn-secundario" id="btnCatTitulo" style="margin-top:10px;">Guardar solo el texto del botón</button>
+    <button class="btn-secundario" id="btnCatOcultar" style="margin-top:10px; display:none;">Ocultar catálogo</button>
+    <button class="btn-danger" id="btnCatEliminar" style="margin-top:10px; display:none;">Eliminar catálogo</button>
+    <div id="catAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
+  </section>
+  </div>
+  <div class="col col-der">
+  <section class="card" style="--orden:2;">
     <h2>📋 Productos actuales</h2>
     <p style="color:var(--muted); font-size:0.85rem; margin-top:-8px;">Destildá un talle para sacarlo al instante (se guarda solo). Tocá un producto para editar precio, descripción, categoría u otros datos.</p>
     <div id="avisoLista"></div>
@@ -276,8 +316,7 @@
     </div>
     <div id="listaProductos"></div>
   </section>
-
-  <section class="card">
+  <section class="card" style="--orden:3;">
     <h2>🗂️ Categorías</h2>
     <div id="listaCategorias"></div>
     <div style="margin-top:16px;">
@@ -291,8 +330,7 @@
       <div id="estadoCategoria" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
     </div>
   </section>
-
-  <section class="card">
+  <section class="card" style="--orden:4;">
     <h2>🔄 Mercado Libre</h2>
     <p style="font-size:0.9rem; margin:0 0 10px;">El catálogo se actualiza solo cada 30 minutos con tus publicaciones: talles con stock, nombres y productos agotados (se ocultan).</p>
     <div id="mlEstado" style="font-size:0.92rem; line-height:1.55;">Cargando…</div>
@@ -313,32 +351,8 @@
     <button class="btn-secundario" id="btnMLInforme" style="margin-top:12px;">Descargar informe en Excel</button>
     <div id="mlAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
   </section>
-
-  <section class="card">
-    <h2>📣 Promo emergente</h2>
-    <p style="font-size:0.9rem; margin:0 0 10px;">Es la imagen que aparece en una ventana al abrir el catálogo. Podés activarla, desactivarla o ponerle una duración.</p>
-    <div class="field"><label for="promoImagen">Imagen de la promo (el flyer)</label><input type="file" id="promoImagen" accept="image/*"></div>
-    <div id="promoVista" style="margin-bottom:12px;"></div>
-    <div class="field"><label for="promoDias">Duración en días (vacío = hasta que la desactives)</label><input type="number" id="promoDias" min="1" max="365" placeholder="Ej: 7"></div>
-    <div id="promoEstado" style="font-size:0.9rem; margin-bottom:10px;"></div>
-    <button class="btn-primary" id="btnPromoPublicar">Publicar / activar promo</button>
-    <button class="btn-danger" id="btnPromoDesactivar" style="margin-top:10px;">Desactivar promo</button>
-    <div id="promoAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
-  </section>
-
-  <section class="card">
-    <h2>📖 Catálogo por pedido (PDF)</h2>
-    <p style="font-size:0.9rem; margin:0 0 10px;">Subí el PDF y se muestra dentro de la página, sin descarga. Cada PDF nuevo reemplaza al anterior.</p>
-    <div class="field"><label for="catPdf">Archivo PDF</label><input type="file" id="catPdf" accept="application/pdf"></div>
-    <div class="field"><label for="catTitulo">Texto del botón en la página</label><input type="text" id="catTitulo" maxlength="40" placeholder="Catálogo por pedido"></div>
-    <div id="catEstado" style="font-size:0.9rem; margin-bottom:10px;"></div>
-    <div id="catProgreso" style="font-size:0.9rem; margin-bottom:10px; display:none;"></div>
-    <button class="btn-primary" id="btnCatPublicar">Subir y publicar catálogo</button>
-    <button class="btn-secundario" id="btnCatTitulo" style="margin-top:10px;">Guardar solo el texto del botón</button>
-    <button class="btn-secundario" id="btnCatOcultar" style="margin-top:10px; display:none;">Ocultar catálogo</button>
-    <button class="btn-danger" id="btnCatEliminar" style="margin-top:10px; display:none;">Eliminar catálogo</button>
-    <div id="catAviso" style="margin-top:12px; font-size:0.9rem; display:none; padding:10px 12px; border-radius:8px;"></div>
-  </section>
+  </div>
+  </div>
 
 </div>
 
