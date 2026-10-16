@@ -298,9 +298,7 @@
     "precio": 32000,
     "descripcion": "Full print · Manga larga · Spum importado de primera calidad",
     "categoria": "varon",
-    "talles": [
-      "12"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA3083392960",
@@ -322,7 +320,8 @@
         "id": "MLA1714649781",
         "talle": "14"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijama_manga_larga_personajes_full_print_marron_claro_capibara_1791232720459_0.jpg",
@@ -376,9 +375,7 @@
     "precio": 32000,
     "descripcion": "Full print · Manga larga · Spum importado de primera calidad",
     "categoria": "varon",
-    "talles": [
-      "6"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA3083417364",
@@ -400,7 +397,8 @@
         "id": "MLA1714649783",
         "talle": "10"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijama_manga_larga_personajes_full_print_negro_rosa_kuromi_y_my_melody_1791232740494_0.webp",
@@ -1858,7 +1856,6 @@
     "talles": [
       "6",
       "8",
-      "10",
       "12",
       "14",
       "16"
