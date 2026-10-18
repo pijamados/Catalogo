@@ -2814,5 +2814,31 @@
         "talle": "10"
       }
     ]
+  },
+  {
+    "imagen": "https://http2.mlstatic.com/D_682761-MLA119718985019_102026-O.webp",
+    "galeria": [
+      "https://http2.mlstatic.com/D_901106-MLA119718135651_102026-O.jpg",
+      "https://http2.mlstatic.com/D_627926-MLA92718599059_092025-O.jpg"
+    ],
+    "rubro": "pijamas",
+    "nombre": "Pijamas Cortos Manga Corta Estampa Brilla En La Oscuridad Gris Pikachu",
+    "precio": 28999,
+    "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
+    "categoria": "",
+    "talles": [
+      "6",
+      "8"
+    ],
+    "ml": [
+      {
+        "id": "MLA2371236112",
+        "talle": "6"
+      },
+      {
+        "id": "MLA2371222876",
+        "talle": "8"
+      }
+    ]
   }
 ]
