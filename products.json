@@ -2783,5 +2783,36 @@
         "talle": "6"
       }
     ]
+  },
+  {
+    "imagen": "https://http2.mlstatic.com/D_898002-MLA119717812127_102026-O.webp",
+    "galeria": [
+      "https://http2.mlstatic.com/D_916233-MLA118083000184_102026-O.jpg",
+      "https://http2.mlstatic.com/D_791067-MLA119717744237_102026-O.webp"
+    ],
+    "rubro": "pijamas",
+    "nombre": "Pijamas Cortos Manga Corta Estampa Brilla En La Oscuridad Lyna",
+    "precio": 28999,
+    "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
+    "categoria": "",
+    "talles": [
+      "8",
+      "10",
+      "12"
+    ],
+    "ml": [
+      {
+        "id": "MLA2207988691",
+        "talle": "12"
+      },
+      {
+        "id": "MLA2207975823",
+        "talle": "8"
+      },
+      {
+        "id": "MLA2207988689",
+        "talle": "10"
+      }
+    ]
   }
 ]
