@@ -1595,9 +1595,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "8"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1783117081",
@@ -1623,7 +1621,8 @@
         "id": "MLA1783179323",
         "talle": "12"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_estampa_brilla_en_la_oscuridad_gris_afa_argentina_1791233026707_0.jpg",
