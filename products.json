@@ -520,7 +520,6 @@
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
     "talles": [
-      "6",
       "8"
     ],
     "ml": [
@@ -1512,7 +1511,6 @@
     "categoria": "mujer",
     "talles": [
       "6",
-      "8",
       "12"
     ],
     "ml": [
@@ -1557,7 +1555,6 @@
     "categoria": "mujer",
     "talles": [
       "10",
-      "12",
       "16"
     ],
     "ml": [
@@ -2741,8 +2738,7 @@
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "varon",
     "talles": [
-      "4",
-      "6"
+      "4"
     ],
     "ml": [
       {
