@@ -437,7 +437,6 @@
     "descripcion": "Full print · Manga larga · Spum importado de primera calidad",
     "categoria": "varon",
     "talles": [
-      "6",
       "8",
       "10",
       "14"
@@ -450,10 +449,6 @@
       {
         "id": "MLA2161047430",
         "talle": "14"
-      },
-      {
-        "id": "MLA2160982816",
-        "talle": "6"
       },
       {
         "id": "MLA2160930790",
