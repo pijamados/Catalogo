@@ -521,10 +521,7 @@
     "categoria": "mujer",
     "talles": [
       "6",
-      "8",
-      "10",
-      "12",
-      "16"
+      "8"
     ],
     "ml": [
       {
@@ -652,9 +649,7 @@
     "precio": 24999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "16"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1515329087",
@@ -680,7 +675,8 @@
         "id": "MLA1515173583",
         "talle": "6"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_blanco_labubu_1791232812975_0.webp",
@@ -1471,11 +1467,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "6",
-      "8",
-      "12"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1783141853",
@@ -1501,7 +1493,8 @@
         "id": "MLA1783117083",
         "talle": "10"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_estampa_brilla_en_la_oscuridad_blanco_kitty2_1791232997749_0.webp",
@@ -1518,7 +1511,6 @@
     "talles": [
       "6",
       "8",
-      "10",
       "12"
     ],
     "ml": [
@@ -1606,11 +1598,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "6",
-      "8",
-      "10"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1783117081",
@@ -1636,7 +1624,8 @@
         "id": "MLA1783179323",
         "talle": "12"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_estampa_brilla_en_la_oscuridad_gris_afa_argentina_1791233026707_0.jpg",
@@ -1986,10 +1975,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "8",
-      "12"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1498461185",
@@ -2015,7 +2001,8 @@
         "id": "MLA1498383321",
         "talle": "10"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_soft_estampa_brilla_en_la_oscuridad_blanco_kuromi_1791233114009_0.jpg",
@@ -2030,10 +2017,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "8",
-      "12"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1506330797",
@@ -2059,7 +2043,8 @@
         "id": "MLA1506343841",
         "talle": "16"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_soft_estampa_brilla_en_la_oscuridad_blanco_la_bubu_1791233125279_0.jpg",
@@ -2204,9 +2189,7 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "6"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1506267395",
@@ -2220,7 +2203,8 @@
         "id": "MLA1506345221",
         "talle": "10"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_largos_soft_estampa_brilla_en_la_oscuridad_gris_minecraft_1791233166279_0.jpg",
@@ -2755,8 +2739,7 @@
     "categoria": "varon",
     "talles": [
       "4",
-      "6",
-      "8"
+      "6"
     ],
     "ml": [
       {
