@@ -652,7 +652,9 @@
     "precio": 24999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [],
+    "talles": [
+      "16"
+    ],
     "ml": [
       {
         "id": "MLA1515329087",
@@ -678,8 +680,7 @@
         "id": "MLA1515173583",
         "talle": "6"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_blanco_labubu_1791232812975_0.webp",
@@ -2750,7 +2751,11 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "varon",
-    "talles": [],
+    "talles": [
+      "4",
+      "6",
+      "8"
+    ],
     "ml": [
       {
         "id": "MLA4032602820",
@@ -2764,8 +2769,7 @@
         "id": "MLA2155481517",
         "talle": "6"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "https://http2.mlstatic.com/D_898002-MLA119717812127_102026-O.webp",
