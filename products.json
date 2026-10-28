@@ -374,7 +374,9 @@
     "precio": 32000,
     "descripcion": "Full print · Manga larga · Spum importado de primera calidad",
     "categoria": "varon",
-    "talles": [],
+    "talles": [
+      "6"
+    ],
     "ml": [
       {
         "id": "MLA3083417364",
@@ -396,8 +398,7 @@
         "id": "MLA1714649783",
         "talle": "10"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijama_manga_larga_personajes_full_print_negro_rosa_kuromi_y_my_melody_1791232740494_0.webp",
