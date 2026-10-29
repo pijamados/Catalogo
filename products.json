@@ -520,7 +520,9 @@
     "precio": 24999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [],
+    "talles": [
+      "6"
+    ],
     "ml": [
       {
         "id": "MLA2255620744",
@@ -546,8 +548,7 @@
         "id": "MLA2255387376",
         "talle": "14"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_blanco_boca_1791232781589_0.webp",
