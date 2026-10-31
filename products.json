@@ -520,7 +520,13 @@
     "precio": 24999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [],
+    "talles": [
+      "6",
+      "8",
+      "10",
+      "12",
+      "16"
+    ],
     "ml": [
       {
         "id": "MLA2255620744",
@@ -546,8 +552,7 @@
         "id": "MLA2255387376",
         "talle": "14"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_blanco_boca_1791232781589_0.webp",
@@ -648,7 +653,9 @@
     "precio": 24999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [],
+    "talles": [
+      "16"
+    ],
     "ml": [
       {
         "id": "MLA1515329087",
@@ -674,8 +681,7 @@
         "id": "MLA1515173583",
         "talle": "6"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_blanco_labubu_1791232812975_0.webp",
@@ -1551,7 +1557,11 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [],
+    "talles": [
+      "10",
+      "12",
+      "16"
+    ],
     "ml": [
       {
         "id": "MLA3185321514",
@@ -1577,8 +1587,7 @@
         "id": "MLA3185205666",
         "talle": "14"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_largos_estampa_brilla_en_la_oscuridad_blanco_snoopy_1791233016557_0.webp",
@@ -1593,7 +1602,11 @@
     "precio": 32000,
     "descripcion": "Brilla en la oscuridad · Manga larga · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [],
+    "talles": [
+      "6",
+      "8",
+      "10"
+    ],
     "ml": [
       {
         "id": "MLA1783117081",
@@ -1619,8 +1632,7 @@
         "id": "MLA1783179323",
         "talle": "12"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_largos_estampa_brilla_en_la_oscuridad_gris_afa_argentina_1791233026707_0.jpg",
@@ -2736,7 +2748,11 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "varon",
-    "talles": [],
+    "talles": [
+      "4",
+      "6",
+      "8"
+    ],
     "ml": [
       {
         "id": "MLA4032602820",
@@ -2750,8 +2766,7 @@
         "id": "MLA2155481517",
         "talle": "6"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "https://http2.mlstatic.com/D_898002-MLA119717812127_102026-O.webp",
