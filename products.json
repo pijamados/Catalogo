@@ -1207,9 +1207,7 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "10"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1577542755",
@@ -1235,7 +1233,8 @@
         "id": "MLA1577581167",
         "talle": "14"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_kuromi_1791232932150_0.jpg",
