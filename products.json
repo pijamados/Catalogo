@@ -870,9 +870,7 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
-    "talles": [
-      "12"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1614733229",
@@ -898,7 +896,8 @@
         "id": "MLA1614872433",
         "talle": "10"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_gris_gamer_1791232861619_0.jpg",
