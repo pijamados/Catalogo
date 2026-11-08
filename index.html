@@ -206,6 +206,10 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
 .tsel{border-width:2px;padding:3px 34px 3px 15px;font-size:.88rem;line-height:1.2;min-width:150px;background-position:right 12px center;background-size:12px}
 .banner h1{margin-top:8px}
 @media(max-width:640px){.cn{padding:3px 11px;font-size:.84rem}.chip{padding:3px 13px;font-size:.84rem}}
+/* Flechas del carrusel traslúcidas */
+.nav{background:color-mix(in srgb,var(--k) 35%,transparent);color:#fff;width:28px;height:28px;font-size:17px;line-height:1;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);text-shadow:0 1px 2px #0005}
+.nav:hover{background:color-mix(in srgb,var(--k) 60%,transparent)}
+@media(hover:none){.nav{opacity:.8}}
 </style>
 </head>
 <body>
