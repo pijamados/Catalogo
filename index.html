@@ -184,6 +184,17 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
 .banner{padding-bottom:42px}
 .hero{padding-bottom:80px}
 @media(max-width:640px){.hero{padding-bottom:56px}}
+/* Filtro de talles desplegable */
+.tsel{appearance:none;-webkit-appearance:none;border:3px solid #fff;border-radius:999px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%231d4ed8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 16px center;color:var(--az);font:700 1rem var(--f);padding:8px 42px 8px 20px;cursor:pointer;min-width:190px}
+.tsel:focus-visible{outline:3px solid #fde047;outline-offset:2px}
+
+/* Tarjetas: borde fino, sin sombra ni relieve */
+.card{border-width:1.5px;box-shadow:none}
+.card:hover,.card:nth-child(even):hover{box-shadow:none;transform:translateY(-3px)}
+.img{border-bottom:1.5px dashed var(--k)}
+.tl span,.tl span:nth-child(2n),.tl span:nth-child(3n){background:#f1f5f9;color:var(--mu);box-shadow:none;border:1px solid var(--ln)}
+.card .btn{border-width:0;box-shadow:none}
+.card .btn:active{box-shadow:none}
 </style>
 </head>
 <body>
@@ -279,7 +290,15 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
     if (ru.genero) chips(f, [["todos","Todos"],["varon","Varón"],["mujer","Mujer"]], () => gen, v => { gen = v; fondo(v); }, "g");
     if (ru.talles) {
       const ts = [...new Set(visibles(ru.id).flatMap(p => (p.talles || []).map(String)))].sort((a, b) => a - b);
-      if (ts.length) chips(f, [["todos","Todos los talles"], ...ts.map(t => [t, "Talle " + t])], () => tal, v => tal = v, "t");
+      if (ts.length) {
+        const w = document.createElement("div"); w.className = "chips";
+        const sel = document.createElement("select"); sel.className = "tsel"; sel.setAttribute("aria-label", "Filtrar por talle");
+        [["todos","Todos los talles"], ...ts.map(t => [t, "Talle " + t])].forEach(([v, t]) => {
+          const o = document.createElement("option"); o.value = v; o.textContent = t; if (tal === v) o.selected = true; sel.appendChild(o);
+        });
+        sel.onchange = () => { tal = sel.value; pintarProductos(); };
+        w.appendChild(sel); f.appendChild(w);
+      }
     }
     pintarProductos();
   }
