@@ -477,9 +477,7 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "varon",
-    "talles": [
-      "8"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA1515302657",
@@ -505,7 +503,8 @@
         "id": "MLA1515211867",
         "talle": "14"
       }
-    ]
+    ],
+    "agotado": true
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_blanco_ballerina_cappuccina_1791232770911_0.webp",
