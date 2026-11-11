@@ -2773,9 +2773,7 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "",
-    "talles": [
-      "8"
-    ],
+    "talles": [],
     "ml": [
       {
         "id": "MLA2371236112",
@@ -2785,6 +2783,7 @@
         "id": "MLA2371222876",
         "talle": "8"
       }
-    ]
+    ],
+    "agotado": true
   }
 ]
