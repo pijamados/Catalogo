@@ -740,7 +740,9 @@
     "categoria": "varon",
     "talles": [
       "6",
-      "10"
+      "8",
+      "10",
+      "14"
     ],
     "ml": [
       {
@@ -995,7 +997,9 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "varon",
-    "talles": [],
+    "talles": [
+      "12"
+    ],
     "ml": [
       {
         "id": "MLA2064018759",
@@ -1021,8 +1025,7 @@
         "id": "MLA2063993147",
         "talle": "10"
       }
-    ],
-    "agotado": true
+    ]
   },
   {
     "imagen": "pijamas_cortos_manga_corta_estampa_brilla_en_la_oscuridad_gris_roblox_1791232886271_0.webp",
@@ -1241,7 +1244,9 @@
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
     "talles": [
-      "12"
+      "12",
+      "14",
+      "16"
     ],
     "ml": [
       {
@@ -1285,6 +1290,7 @@
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "mujer",
     "talles": [
+      "6",
       "12"
     ],
     "ml": [
@@ -2796,7 +2802,9 @@
     "precio": 28999,
     "descripcion": "Brilla en la oscuridad · Manga corta · Algodón peinado premium",
     "categoria": "",
-    "talles": [],
+    "talles": [
+      "8"
+    ],
     "ml": [
       {
         "id": "MLA2371236112",
@@ -2806,7 +2814,6 @@
         "id": "MLA2371222876",
         "talle": "8"
       }
-    ],
-    "agotado": true
+    ]
   }
 ]
