@@ -137,6 +137,14 @@
   .producto-info .precio-msg.error-msg { color: #dc2626; font-weight: 600; }
   .producto-info .talles-resumen { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
+  .btn-editar {
+    width: auto; flex-shrink: 0; align-self: flex-start;
+    background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe;
+    padding: 8px 14px; font-size: 0.85rem;
+  }
+  .btn-editar:hover { background: var(--blue-chip); }
+  .producto-row.editando .btn-editar { background: var(--accent); color: #fff; border-color: var(--accent); }
+
   .chk-producto, .chk-todos {
     width: 22px; height: 22px; flex-shrink: 0; cursor: pointer; accent-color: var(--green);
   }
@@ -1078,6 +1086,7 @@
             <div class="talles-rapidos"></div>
             <div class="talles-msg"></div>
           </div>
+          <button type="button" class="btn-editar">✏️ Editar</button>
         `;
 
         const precioInput = row.querySelector(".precio-input");
@@ -1117,6 +1126,7 @@
         row.dataset.g = g.rubro.id;
         if (claveSub) row.dataset.s = claveSub;
         row.onclick = () => abrirPanelEdicion(p, row);
+        row.querySelector(".btn-editar").onclick = (e) => { e.stopPropagation(); abrirPanelEdicion(p, row); };
         listaProductos.appendChild(row);
 
         const panelEdicion = document.createElement("div");
@@ -1144,6 +1154,7 @@
           <div class="field campo-genero">
             <label>Género</label>
             <select class="edit-categoria">
+              <option value="" ${(p.categoria === "varon" || p.categoria === "mujer") ? "" : "selected"}>Sin género</option>
               <option value="varon" ${p.categoria === "varon" ? "selected" : ""}>Varón</option>
               <option value="mujer" ${p.categoria === "mujer" ? "selected" : ""}>Mujer</option>
             </select>
@@ -1233,7 +1244,7 @@
 
         listaProductos.appendChild(panelEdicion);
 
-        panelEdicion.querySelector(".btn-cerrar-edicion").onclick = () => panelEdicion.classList.remove("abierto");
+        panelEdicion.querySelector(".btn-cerrar-edicion").onclick = () => { panelEdicion.classList.remove("abierto"); row.classList.remove("editando"); };
         panelEdicion.querySelector(".btn-guardar-edicion").onclick = () => guardarEdicion(p.imagen, panelEdicion);
 
         const selR = panelEdicion.querySelector(".edit-rubro");
@@ -1343,7 +1354,10 @@
     document.querySelectorAll(".panel-edicion.abierto").forEach((p) => {
       if (p !== panelEdicion) p.classList.remove("abierto");
     });
-    panelEdicion.classList.toggle("abierto");
+    document.querySelectorAll(".producto-row.editando").forEach((r) => { if (r !== row) r.classList.remove("editando"); });
+    const abierto = panelEdicion.classList.toggle("abierto");
+    row.classList.toggle("editando", abierto);
+    if (abierto) panelEdicion.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   async function guardarEdicion(imagen, panelEdicion) {
