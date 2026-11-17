@@ -73,10 +73,22 @@ h2{font:800 clamp(1.7rem,4vw,2.4rem) var(--f);text-align:center;margin:0 0 8px}
 .vacio{grid-column:1/-1;text-align:center;color:var(--mu);padding:50px 0}
 footer{border-top:1px solid var(--ln);background:#fff;padding:36px 5vw;text-align:center;color:var(--mu);font-size:.85rem}
 footer img{height:40px;display:block;margin:0 auto 10px}
-#modal{position:fixed;inset:0;z-index:100;background:#0f172ad9;backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center}
+#modal{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 30%,#1d4ed8e6,#0f172af2);backdrop-filter:blur(5px);display:none;justify-content:center;align-items:center}
 .mm{position:relative;display:inline-block;max-width:90%;max-height:88vh;line-height:0}
-#mi{max-width:100%;max-height:88vh;border-radius:10px;display:block}
-#modal button{position:absolute;background:#ffffff26;color:#fff;border:0;border-radius:50%;width:46px;height:46px;font-size:26px;cursor:pointer}
+#mi{max-width:100%;max-height:calc(100vh - 230px);max-height:calc(100dvh - 230px);border-radius:16px;display:block}
+.mm::after{border-radius:16px}
+.mw{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;border-radius:26px;padding:10px 10px 14px;max-width:min(92vw,540px);box-shadow:0 0 0 5px #fde047,0 10px 0 5px #b45309,0 24px 50px #0008;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.85) rotate(-2deg);opacity:0}}
+.mw::before,.mw::after{position:absolute;font-size:2.1rem;line-height:1;filter:drop-shadow(0 3px 0 #0003);pointer-events:none;animation:flota 4s ease-in-out infinite}
+.mw::before{content:"⭐";top:-20px;left:-14px}.mw::after{content:"🌙";top:-18px;right:-12px;animation-delay:-1.5s}
+.mf{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px 0;position:relative}
+.mf::before{content:"";position:absolute;left:6px;right:6px;top:0;height:6px;border-radius:6px;background:repeating-linear-gradient(90deg,var(--ro) 0 16px,var(--am) 16px 32px,var(--ve) 32px 48px,var(--az) 48px 64px,var(--rs) 64px 80px)}
+.mt{display:flex;align-items:baseline;justify-content:center;gap:10px;margin-top:6px;max-width:100%}
+#mnm{font:800 1.15rem/1.15 var(--f);color:var(--tx);text-align:center}
+#mct{font:700 .8rem var(--f);color:#fff;background:var(--az);border-radius:999px;padding:1px 10px;white-space:nowrap}
+#mwa{justify-content:center;padding:9px 22px;font-size:.95rem}
+#modal button{position:absolute;background:var(--am);color:var(--tx);border:3px solid #fff;border-radius:50%;width:46px;height:46px;font-size:26px;line-height:1;cursor:pointer;box-shadow:0 4px 0 #b45309;transition:transform .15s}#modal button:active{transform:translateY(3px);box-shadow:0 1px 0 #b45309}
+#mp,#mn{margin-top:-23px;z-index:2}
 #mx{top:20px;right:22px}#mp{left:14px;top:50%}#mn{right:14px;top:50%}
 #promo{display:none;position:fixed;inset:0;background:#0f172aa6;z-index:200;align-items:center;justify-content:center;padding:16px}
 #promo div{position:relative;max-width:min(440px,100%)}
@@ -153,6 +165,7 @@ footer::after{content:"🌙 ⭐ 🧸 ⭐ 🌙";display:block;margin-top:10px;fon
 #cv .bar{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
 .cf{position:fixed;z-index:999;pointer-events:none;width:11px;height:11px;border-radius:3px;animation:cae 1.1s cubic-bezier(.2,.7,.4,1) forwards}
 @keyframes cae{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+@media(max-width:640px){#modal button{width:40px;height:40px;font-size:22px}#mp{left:4px}#mn{right:4px}#mnm{font-size:1rem}.mw{padding:8px 8px 12px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:640px){.dec.nube,.dec.luna{opacity:.6}.col::before{font-size:2rem}.hero{padding-bottom:70px}}
 
@@ -269,7 +282,7 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
 
 <footer><img src="pijamados.png" alt="Pijamados">@pijamadosok · Consultas por WhatsApp<span class="credito">Design by S.E.R.</span></footer>
 
-<div id="modal"><button id="mx">&times;</button><button id="mp">‹</button><span class="mm"><img id="mi" alt="" draggable="false"></span><button id="mn">›</button></div>
+<div id="modal"><button id="mx">&times;</button><button id="mp">‹</button><div class="mw"><span class="mm"><img id="mi" alt="" draggable="false"></span><div class="mf"><div class="mt"><b id="mnm"></b><span id="mct"></span></div><a id="mwa" class="btn" target="_blank" rel="noopener">Consultar por WhatsApp</a></div></div><button id="mn">›</button></div>
 <div id="promo"><div><button id="pc" aria-label="Cerrar">&times;</button><img id="pi" alt="Promoción"></div></div>
 <div id="cv" hidden><div class="bar"><span id="cvt">Catálogo por pedido</span><button id="cvx" aria-label="Cerrar">&times;</button></div><div id="cvs"><div id="cvp"></div></div><a id="cvw" class="btn" target="_blank" rel="noopener">Hacer mi pedido por WhatsApp</a></div>
 
@@ -363,7 +376,7 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
       const ir = d => { i = (i + d + fotos.length) % fotos.length; img.src = ruta(fotos[i]); pts.forEach((x, k) => x.classList.toggle("on", k === i)); };
       const pv = card.querySelector(".prev"), nx = card.querySelector(".next");
       if (pv) { pv.onclick = e => { e.stopPropagation(); ir(-1); }; nx.onclick = e => { e.stopPropagation(); ir(1); }; }
-      card.querySelector(".img").onclick = () => abrir(fotos.map(ruta), i);
+      card.querySelector(".img").onclick = () => abrir(fotos.map(ruta), i, nombre, `https://wa.me/${WA}?text=${msg}`);
       grid.appendChild(card);
     });
   }
@@ -380,8 +393,15 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
   // Visor de fotos
   let gal = [], gi = 0, tx = null;
   const modal = $("modal");
-  const mostrar = () => { $("mi").src = gal[gi]; $("mp").style.display = $("mn").style.display = gal.length > 1 ? "block" : "none"; };
-  const abrir = (f, i) => { gal = f; gi = i; modal.style.display = "flex"; mostrar(); };
+  const mostrar = () => {
+    $("mi").src = gal[gi]; $("mp").style.display = $("mn").style.display = gal.length > 1 ? "block" : "none";
+    $("mct").textContent = gal.length > 1 ? `${gi + 1} / ${gal.length}` : ""; $("mct").hidden = gal.length < 2;
+  };
+  const abrir = (f, i, nombre, wa) => {
+    gal = f; gi = i; $("mnm").textContent = nombre || ""; $("mwa").href = wa || "#"; $("mwa").hidden = !wa;
+    modal.style.display = "flex"; mostrar();
+    const w = document.querySelector(".mw"); w.style.animation = "none"; void w.offsetWidth; w.style.animation = "";
+  };
   const mover = d => { gi = (gi + d + gal.length) % gal.length; mostrar(); };
   $("mp").onclick = e => { e.stopPropagation(); mover(-1); };
   $("mn").onclick = e => { e.stopPropagation(); mover(1); };
