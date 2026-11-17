@@ -184,6 +184,21 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
 .banner{padding-bottom:42px}
 .hero{padding-bottom:80px}
 @media(max-width:640px){.hero{padding-bottom:56px}}
+/* Celu: los dibujos van en franjas libres (arriba y abajo) para no pisar el texto */
+@media(max-width:640px){
+.hero{padding-top:64px;padding-bottom:104px}
+.hero .st,.hero .dec{top:auto;bottom:auto;left:auto;right:auto}
+.hero .s1{width:30px;top:14px;left:6%}
+.hero .cor{width:26px;top:16px;left:24%}
+.hero .glo{width:26px;top:12px;left:42%}
+.hero .glo.g2{width:24px;top:14px;right:24%}
+.hero .s2{width:26px;top:16px;right:7%}
+.hero .nube{width:84px;bottom:26px;left:-14px;opacity:.9}
+.hero .nube.n2{width:70px;bottom:30px;right:-12px;opacity:.9}
+.hero .luna{width:38px;bottom:34px;right:28%}
+.hero .s3{width:20px;bottom:44px;left:28%}
+.hero .s4{width:24px;bottom:36px;left:46%}
+}
 /* Filtro de talles desplegable */
 .tsel{appearance:none;-webkit-appearance:none;border:3px solid #fff;border-radius:999px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%231d4ed8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 16px center;color:var(--az);font:700 1rem var(--f);padding:8px 42px 8px 20px;cursor:pointer;min-width:190px}
 .tsel:focus-visible{outline:3px solid #fde047;outline-offset:2px}
@@ -266,17 +281,19 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
   const ruta = n => /^https?:\/\//i.test(n) ? n : "img/" + n;
   const COLORES = ["--az", "--ro", "--ve", "--am"];
   const DEF = [{id:"pijamas",nombre:"Pijamas",genero:true,talles:true},{id:"remeras",nombre:"Remeras",genero:true,talles:true},{id:"mantas",nombre:"Mantas",genero:false,talles:false}];
-  let P = [], R = DEF, ru = null, gen = "todos", tal = "todos", CAT = null;
+  let P = [], R = DEF, cargado = false, ru = null, gen = "todos", tal = "todos", CAT = null;
   const FONDOS = {varon:["#93c5fd","#bfdbfe"],mujer:["#f9a8d4","#fbcfe8"],todos:["#bfdbfe","#bfdbfe"]};
   const fondo = g => { const [a, b] = FONDOS[g] || FONDOS.todos; const st = document.documentElement.style; st.setProperty("--d1", a); st.setProperty("--d2", b); };
   const rubroDe = p => p.rubro || "pijamas";
   const visibles = id => P.filter(p => rubroDe(p) === id && p.imagen && !p.agotado);
-  const color = id => `var(${COLORES[Math.max(0, R.findIndex(r => r.id === id)) % 4]})`;
+  // Solo se muestran los rubros que tienen productos (mientras carga, se muestran todos)
+  const RV = () => cargado ? R.filter(r => visibles(r.id).length) : R;
+  const color = id => `var(${COLORES[Math.max(0, RV().findIndex(r => r.id === id)) % 4]})`;
   $("navWa").href = `https://wa.me/${WA}?text=${encodeURIComponent("¡Hola! Quisiera hacer una consulta.")}`;
 
   function pintarHome() {
     document.title = "Pijamados | Pijamas animados";
-    let h = R.map((r, i) => {
+    let h = RV().map((r, i) => {
       return `<a class="col" style="--c:var(${COLORES[i % 4]})" href="#/${esc(r.id)}"><h3>${esc(r.nombre)}</h3><span class="ver">Ver colección →</span></a>`;
     }).join("");
     if (CAT) h += `<button class="col esp" id="tileCat"><span class="n">Pedidos especiales</span><h3>${esc(CAT.titulo || "Catálogo por pedido")}</h3><span class="ver">Ver catálogo →</span></button>`;
@@ -298,11 +315,16 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
   function pintarRubro() {
     document.title = ru.nombre + " | Pijamados";
     $("rTitulo").textContent = ru.nombre;
-    $("catnav").innerHTML = `<a class="cn home" href="#/">← Inicio</a>` + R.map((r, i) => `<a class="cn${r.id === ru.id ? " on" : ""}" style="--c:var(${COLORES[i % 4]})" href="#/${esc(r.id)}">${esc(r.nombre)}</a>`).join("") + (CAT ? `<button class="cn esp" type="button" id="cnCat">🎁 ${esc(CAT.titulo || "Catálogo por pedido")}</button>` : "");
+    $("catnav").innerHTML = `<a class="cn home" href="#/">← Inicio</a>` + RV().map((r, i) => `<a class="cn${r.id === ru.id ? " on" : ""}" style="--c:var(${COLORES[i % 4]})" href="#/${esc(r.id)}">${esc(r.nombre)}</a>`).join("") + (CAT ? `<button class="cn esp" type="button" id="cnCat">🎁 ${esc(CAT.titulo || "Catálogo por pedido")}</button>` : "");
     if (CAT) $("cnCat").onclick = abrirCat;
     $("banner").style.setProperty("--c", color(ru.id));
     const f = $("filtros"); f.innerHTML = "";
-    if (ru.genero) chips(f, [["todos","Todos"],["varon","Varón"],["mujer","Mujer"]], () => gen, v => { gen = v; fondo(v); }, "g");
+    if (ru.genero) {
+      // Solo se ofrecen los géneros que tienen productos; si no hay nada para elegir, no se muestra el filtro
+      const vis = visibles(ru.id), cg = g => vis.filter(p => (p.categoria || "").toLowerCase() === g).length;
+      const gs = [["varon","Varón"],["mujer","Mujer"]].filter(([g]) => cg(g));
+      if (gs.some(([g]) => cg(g) < vis.length)) chips(f, [["todos","Todos"], ...gs], () => gen, v => { gen = v; fondo(v); }, "g");
+    }
     if (ru.talles) {
       const ts = [...new Set(visibles(ru.id).flatMap(p => (p.talles || []).map(String)))].sort((a, b) => a - b);
       if (ts.length) {
@@ -347,7 +369,7 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
 
   function render() {
     const id = location.hash.replace(/^#\/?/, "").toLowerCase();
-    ru = R.find(r => r.id === id) || null; gen = "todos"; tal = "todos"; fondo("todos");
+    ru = RV().find(r => r.id === id) || null; gen = "todos"; tal = "todos"; fondo("todos");
     $("home").hidden = !!ru; $("rubro").hidden = !ru;
     ru ? pintarRubro() : pintarHome();
     scrollTo(0, 0);
@@ -420,7 +442,7 @@ mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,radial-gradi
   Promise.all([
     fetch("./products.json?t=" + Date.now()).then(r => { if (!r.ok) throw 0; return r.json(); }),
     fetch("./categorias.json?t=" + Date.now()).then(r => r.ok ? r.json() : DEF).catch(() => DEF)
-  ]).then(([p, r]) => { P = p; if (Array.isArray(r) && r.length) R = r; render(); })
+  ]).then(([p, r]) => { P = p; if (Array.isArray(r) && r.length) R = r; cargado = true; render(); })
     .catch(() => $("colgrid").insertAdjacentHTML("afterend", `<p class="sub" style="margin-top:28px">No se pudo cargar el catálogo. Intentá de nuevo en un momento.</p>`));
 })();
 </script>
